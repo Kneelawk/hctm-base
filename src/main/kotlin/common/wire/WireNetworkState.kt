@@ -146,10 +146,16 @@ class WireNetworkController(var changeListener: () -> Unit = {}, internal val wo
         val toRebuild = networks.takeIf { it.isNotEmpty() }?.map { Pair(it, this.networks[it]) }
             ?: this.networks.entries.map { Pair(it.key, it.value) }
 
+        val toRemove = mutableListOf<Pair<BlockPos, Network>>()
+
         for ((id, net) in toRebuild) {
-            for ((pos, net) in networksInPos.entries().toSet()) {
-                if (net.id == id) networksInPos.remove(pos, net)
+            for ((pos, netInPos) in networksInPos.entries()) {
+                if (netInPos.id == id) toRemove.add(Pair(pos, netInPos))
             }
+            for ((pos, netInPos) in toRemove) {
+                networksInPos.remove(pos, netInPos)
+            }
+            toRemove.clear()
 
             nodesToNetworks -= nodesToNetworks.filterValues { it == id }.keys
 
@@ -157,7 +163,7 @@ class WireNetworkController(var changeListener: () -> Unit = {}, internal val wo
                 net.rebuildRefs()
                 net.getNodes()
                     .onEach { nodesToNetworks[it] = net.id }
-                    .map { it.data.pos }.toSet()
+                    .map { it.data.pos }
                     .forEach { networksInPos.put(it, net) }
             }
         }
