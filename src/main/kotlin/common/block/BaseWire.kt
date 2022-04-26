@@ -4,9 +4,10 @@ import net.dblsaiko.hctm.block.BlockCustomBreak
 import net.dblsaiko.hctm.common.block.ConnectionType.CORNER
 import net.dblsaiko.hctm.common.block.ConnectionType.EXTERNAL
 import net.dblsaiko.hctm.common.block.ConnectionType.INTERNAL
-import net.dblsaiko.hctm.common.wire.BlockPartProvider
 import net.dblsaiko.hctm.common.wire.PartExt
-import net.dblsaiko.hctm.common.wire.WirePartExtType
+import net.dblsaiko.hctm.common.wire.PartExtProvider
+import net.dblsaiko.hctm.common.wire.PartExtType
+import net.dblsaiko.hctm.common.wire.WirePartExt
 import net.dblsaiko.hctm.common.wire.getWireNetworkState
 import net.minecraft.advancement.criterion.Criteria
 import net.minecraft.block.AbstractBlock
@@ -49,7 +50,7 @@ import net.minecraft.world.World
 import net.minecraft.world.WorldAccess
 import net.minecraft.world.WorldView
 
-abstract class BaseWireBlock(settings: AbstractBlock.Settings, val height: Float) : Block(settings), BlockCustomBreak, BlockPartProvider, BlockEntityProvider {
+abstract class BaseWireBlock(settings: AbstractBlock.Settings, val height: Float) : Block(settings), BlockCustomBreak, PartExtProvider, BlockEntityProvider {
 
     val boxes = WireUtils.generateShapes(height.toDouble())
 
@@ -116,16 +117,10 @@ abstract class BaseWireBlock(settings: AbstractBlock.Settings, val height: Float
 
     override fun prepare(state: BlockState, world: WorldAccess, pos: BlockPos, flags: Int, i: Int) {
         if (!world.isClient && world is ServerWorld)
-            world.getWireNetworkState().controller.onBlockChanged(world, pos, state)
-    }
-
-    override fun getPartsInBlock(world: World, pos: BlockPos, state: BlockState): Set<PartExt> {
-        return WireUtils.getOccupiedSides(state).flatMap(::createPartExtsFromSide).toSet()
+            world.getWireNetworkState().controller.onChanged(world, pos)
     }
 
     abstract override fun createBlockEntity(pos: BlockPos, state: BlockState): BaseWireBlockEntity
-
-    protected abstract fun createPartExtsFromSide(side: Direction): Set<PartExt>
 
     open fun mustConnectInternally() = false
 
@@ -161,22 +156,30 @@ abstract class BaseWireBlock(settings: AbstractBlock.Settings, val height: Float
 
 }
 
-abstract class SingleBaseWireBlock(settings: AbstractBlock.Settings, height: Float) : BaseWireBlock(settings, height) {
+interface BaseWirePartExtType : PartExtType {
+    override fun createExtsForContainer(world: World, pos: BlockPos, provider: PartExtProvider): Sequence<PartExt> {
+        val state = world.getBlockState(pos)
+        return WireUtils.getOccupiedSides(state).asSequence().flatMap(::createPartExtsFromSide)
+    }
 
-    override fun createExtFromTag(tag: NbtElement): PartExt? {
+    fun createPartExtsFromSide(side: Direction): Sequence<PartExt>
+}
+
+interface SingleBaseWirePartExtType : BaseWirePartExtType {
+    override fun createExtFromTag(tag: NbtElement?): PartExt? {
         return (tag as? NbtByte)
             ?.takeIf { it.intValue() in 0 until 6 }
             ?.let { createPartExtFromSide(Direction.byId(it.intValue())) }
     }
 
-    override fun createPartExtsFromSide(side: Direction): Set<PartExt> =
-        setOf(createPartExtFromSide(side))
+    override fun createPartExtsFromSide(side: Direction): Sequence<PartExt> =
+        sequenceOf(createPartExtFromSide(side))
 
-    protected abstract fun createPartExtFromSide(side: Direction): PartExt
-
+    fun createPartExtFromSide(side: Direction): PartExt
 }
 
-open class BaseWireBlockEntity(type: BlockEntityType<out BlockEntity>, pos: BlockPos, state: BlockState) : BlockEntity(type, pos, state) {
+open class BaseWireBlockEntity(type: BlockEntityType<out BlockEntity>, pos: BlockPos, state: BlockState) :
+    BlockEntity(type, pos, state) {
 
     var connections: Set<WireRepr> = emptySet()
         private set
@@ -376,13 +379,13 @@ object WireUtils {
         val net = world.getWireNetworkState().controller
 
         val nodes1 = net.getNodesAt(pos)
-            .filter { it.data.ext is WirePartExtType }
-            .groupBy { (it.data.ext as WirePartExtType).side }
+            .filter { it.data.ext is WirePartExt }
+            .groupBy { (it.data.ext as WirePartExt).side }
             .mapValues { (side, nodes) ->
                 val c = nodes.flatMap { node ->
                     node.connections.mapNotNull {
                         val other = it.other(node)
-                        if (node.data.pos == other.data.pos && other.data.ext is WirePartExtType) Connection(other.data.ext.side, INTERNAL)
+                        if (node.data.pos == other.data.pos && other.data.ext is WirePartExt) Connection(other.data.ext.side, INTERNAL)
                         else other.data.pos.subtract(node.data.pos.offset(side)).let { Direction.fromVector(it.x, it.y, it.z) }?.let { Connection(it, CORNER) }
                             ?: other.data.pos.subtract(node.data.pos).let { Direction.fromVector(it.x, it.y, it.z) }?.let { Connection(it, EXTERNAL) }
                     }

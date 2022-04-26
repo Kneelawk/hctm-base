@@ -31,7 +31,7 @@ public class ServerNetHandler {
         }
 
         var wns = WireNetworkStateKt.getWireNetworkState(world);
-        var nbt = wns.getController().toTag(world);
+        var nbt = wns.getController().toTag();
 
         this.debugNetResponse.send(responseSender, new DebugNetResponse(msg.world(), nbt));
     }

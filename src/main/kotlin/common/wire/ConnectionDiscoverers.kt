@@ -5,13 +5,13 @@ import net.minecraft.util.math.Direction
 import kotlin.reflect.KClass
 
 object ConnectionDiscoverers {
-    val WIRE = connectionDiscoverer<WirePartExtType, Direction> {
+    val WIRE = connectionDiscoverer<WirePartExt, Direction> {
         // wires in same block
         connectionRule {
             forOutputs { Direction.values().filter { it.axis != self.data.ext.side.axis } }
             connect {
                 findNode(pos,
-                    Constraint(WirePartExtType::class) { it.side == output && it.canConnectAt(world, pos, self.data.ext.side) }
+                    Constraint(WirePartExt::class) { it.side == output && it.canConnectAt(world, pos, self.data.ext.side) }
                 )
             }
         }
@@ -22,7 +22,7 @@ object ConnectionDiscoverers {
             connect {
                 val otherPos = pos.offset(output)
                 findNode(otherPos,
-                    Constraint(WirePartExtType::class) { it.side == self.data.ext.side && it.canConnectAt(world, otherPos, output.opposite) }
+                    Constraint(WirePartExt::class) { it.side == self.data.ext.side && it.canConnectAt(world, otherPos, output.opposite) }
                 )
             }
         }
@@ -33,7 +33,7 @@ object ConnectionDiscoverers {
             connect {
                 findNode(
                     pos.offset(output),
-                    Constraint(FullBlockPartExtType::class)
+                    Constraint(FullBlockPartExt::class)
                 )
             }
         }
@@ -44,7 +44,7 @@ object ConnectionDiscoverers {
             connect {
                 val otherPos = pos.offset(output).offset(self.data.ext.side)
                 findNode(otherPos,
-                    Constraint(WirePartExtType::class) { it.side == output.opposite && it.canConnectAt(world, otherPos, self.data.ext.side.opposite) }
+                    Constraint(WirePartExt::class) { it.side == output.opposite && it.canConnectAt(world, otherPos, self.data.ext.side.opposite) }
                 )
             }
         }
@@ -54,12 +54,12 @@ object ConnectionDiscoverers {
 
     private val edges = Direction.values().flatMap { side -> Direction.values().filter { edge -> edge.axis != side.axis }.map { edge -> Edge(side, edge) } }
 
-    val FULL_BLOCK = connectionDiscoverer<FullBlockPartExtType, Edge> {
+    val FULL_BLOCK = connectionDiscoverer<FullBlockPartExt, Edge> {
         connectionRule {
             forOutputs { edges }
             connect {
                 findNode(pos.offset(output.side),
-                    Constraint(WirePartExtType::class) { it.side == output.edge }
+                    Constraint(WirePartExt::class) { it.side == output.edge }
                 )
             }
         }
@@ -69,7 +69,7 @@ object ConnectionDiscoverers {
             connect {
                 findNode(
                     pos.offset(output.side),
-                    Constraint(FullBlockPartExtType::class)
+                    Constraint(FullBlockPartExt::class)
                 )
             }
         }

@@ -6,7 +6,7 @@ import net.dblsaiko.hctm.common.graph.Link
 import net.dblsaiko.hctm.common.graph.Node
 import net.fabricmc.fabric.api.util.NbtType
 import net.minecraft.block.Block
-import net.minecraft.block.BlockState
+import net.minecraft.block.Blocks
 import net.minecraft.nbt.NbtCompound
 import net.minecraft.nbt.NbtElement
 import net.minecraft.nbt.NbtList
@@ -28,7 +28,7 @@ class WireNetworkState(val world: ServerWorld) : PersistentState() {
     var controller = WireNetworkController(::markDirty, world)
 
     override fun writeNbt(nbt: NbtCompound): NbtCompound {
-        return nbt.copyFrom(controller.toTag(world))
+        return nbt.copyFrom(controller.toTag())
     }
 
     companion object {
@@ -43,15 +43,20 @@ class WireNetworkState(val world: ServerWorld) : PersistentState() {
 
 class WireNetworkController(var changeListener: () -> Unit = {}, internal val world: ServerWorld? = null) {
     private val networks = mutableMapOf<UUID, Network>()
-    @JvmSynthetic internal val networksInPos = HashMultimap.create<BlockPos, Network>()
-    @JvmSynthetic internal val nodesToNetworks = mutableMapOf<NetNode, UUID>()
+    @JvmSynthetic
+    internal val networksInPos = HashMultimap.create<BlockPos, Network>()
+    @JvmSynthetic
+    internal val nodesToNetworks = mutableMapOf<NetNode, UUID>()
 
     private var changed = setOf<NetNode>()
 
-    fun onBlockChanged(world: ServerWorld, pos: BlockPos, state: BlockState) {
-        val actualState = world.getBlockState(pos)
-        val worldExts = (actualState.block as? BlockPartProvider)?.getPartsInBlock(world, pos, actualState).orEmpty()
+    fun onChanged(world: ServerWorld, pos: BlockPos) {
+        val worldExts = WireRegistries.getPartExtsInBlock(world, pos)
 
+        onNodesChanged(worldExts, pos, world)
+    }
+
+    private fun onNodesChanged(worldExts: Set<PartExt>, pos: BlockPos, world: ServerWorld) {
         val new = worldExts.toMutableSet()
 
         for (net in networksInPos[pos].toSet()) {
@@ -78,10 +83,6 @@ class WireNetworkController(var changeListener: () -> Unit = {}, internal val wo
         return networksInPos[pos]
     }
 
-    fun getBlockType(world: World, node: NetNode): Block {
-        return world.getBlockState(node.data.pos).block
-    }
-
     fun getNetworks() = networks.values.toSet()
 
     fun updateNodeConnections(world: ServerWorld, node: NetNode) {
@@ -89,10 +90,11 @@ class WireNetworkController(var changeListener: () -> Unit = {}, internal val wo
         val nodeNetId = getNetIdForNode(node)
 
         val nv = NodeView(world)
+        val oldConnections = node.connections.map { it.other(node) }.toSet()
         val ids = node.data.ext.tryConnect(node, world, node.data.pos, nv)
-        val oldConnections = node.connections.map { it.other(node) }
-        val potentialNewConnections = ids.filter { getNetIdForNode(it) != nodeNetId || it !in oldConnections }
-        val newConnections = potentialNewConnections.filter { node in it.data.ext.tryConnect(it, world, it.data.pos, nv) }
+        val returnedConnections = ids.filter { node in it.data.ext.tryConnect(it, world, it.data.pos, nv) }.toSet()
+        val newConnections = returnedConnections.filter { getNetIdForNode(it) != nodeNetId || it !in oldConnections }
+        val removedConnections = oldConnections.filter { it !in returnedConnections }
 
         for (other in newConnections) {
             val net = networks.getValue(nodeNetId)
@@ -102,6 +104,18 @@ class WireNetworkController(var changeListener: () -> Unit = {}, internal val wo
             }
 
             net.link(node, other)
+        }
+
+        val net = networks.getValue(nodeNetId)
+        for (other in removedConnections) {
+            net.unlink(node, other)
+        }
+
+        if (removedConnections.isNotEmpty()) {
+            // This is expensive, so I want to avoid it if at all possible
+            net.split().forEach { rebuildRefs(it.id) }
+            if (net.getNodes().isEmpty()) destroyNetwork(net.id)
+            rebuildRefs(net.id)
         }
     }
 
@@ -129,7 +143,8 @@ class WireNetworkController(var changeListener: () -> Unit = {}, internal val wo
 
     fun rebuildRefs(vararg networks: UUID) {
         changeListener()
-        val toRebuild = networks.takeIf { it.isNotEmpty() }?.map { Pair(it, this.networks[it]) } ?: this.networks.entries.map { Pair(it.key, it.value) }
+        val toRebuild = networks.takeIf { it.isNotEmpty() }?.map { Pair(it, this.networks[it]) }
+            ?: this.networks.entries.map { Pair(it.key, it.value) }
 
         for ((id, net) in toRebuild) {
             for ((pos, net) in networksInPos.entries().toSet()) {
@@ -156,10 +171,10 @@ class WireNetworkController(var changeListener: () -> Unit = {}, internal val wo
         }
     }
 
-    fun toTag(world: World): NbtCompound {
+    fun toTag(): NbtCompound {
         val tag = NbtCompound()
         val list = NbtList()
-        networks.values.map { it.toTag(world, NbtCompound()) }.forEach { list.add(it) }
+        networks.values.map { it.toTag(NbtCompound()) }.forEach { list.add(it) }
         tag.put("networks", list)
         return tag
     }
@@ -229,6 +244,12 @@ class Network(val controller: WireNetworkController, val id: UUID) {
         controller.scheduleUpdate(node2)
     }
 
+    fun unlink(node1: NetNode, node2: NetNode) {
+        graph.unlink(node1, node2, null)
+        controller.scheduleUpdate(node1)
+        controller.scheduleUpdate(node2)
+    }
+
     fun merge(other: Network) {
         controller.changeListener()
         if (other.id != id) {
@@ -273,13 +294,13 @@ class Network(val controller: WireNetworkController, val id: UUID) {
         }
     }
 
-    fun toTag(world: World, tag: NbtCompound): NbtCompound {
+    fun toTag(tag: NbtCompound): NbtCompound {
         val serializedNodes = mutableListOf<NbtCompound>()
         val serializedLinks = mutableListOf<NbtCompound>()
         val nodes = graph.nodes.toList()
         val n1 = nodes.withIndex().associate { it.value to it.index }
         for (node in nodes) {
-            serializedNodes += node.data.toTag(controller.getBlockType(world, node), NbtCompound())
+            serializedNodes += node.data.toTag(NbtCompound())
         }
         for (link in nodes.flatMap { it.connections }.distinct()) {
             val sLink = NbtCompound()
@@ -330,32 +351,71 @@ class Network(val controller: WireNetworkController, val id: UUID) {
 }
 
 data class NetworkPart<T : PartExt>(var pos: BlockPos, val ext: T) {
-    fun toTag(block: Block, tag: NbtCompound): NbtCompound {
+    fun toTag(tag: NbtCompound): NbtCompound {
         tag.putInt("x", pos.x)
         tag.putInt("y", pos.y)
         tag.putInt("z", pos.z)
-        tag.put("ext", ext.toTag())
-        tag.putString("block", Registry.BLOCK.getId(block).toString())
+
+        ext.toTag()?.let { tag.put("ext", it) }
+
+        val typeId = WireRegistries.EXT_PART_TYPE.getId(ext.type)
+        // This would be a programmer error, so better make a loud noise!
+            ?: throw IllegalStateException("Attempted to store unknown PartExtType: ${ext.type}")
+
+        tag.putString("type", typeId.toString())
+
         return tag
     }
 
     companion object {
         fun fromTag(tag: NbtCompound): NetworkPart<PartExt>? {
-            val block = Registry.BLOCK[Identifier(tag.getString("block"))]
+            val type = when {
+                tag.contains("type", NbtType.STRING) -> {
+                    val typeId = Identifier(tag.getString("type"))
+                    val type = WireRegistries.EXT_PART_TYPE[typeId]
+                    if (type == null) {
+                        System.err.println("Tried to load unknown PartExtType: $typeId")
+                        return null
+                    }
+                    type
+                }
+                tag.contains("block", NbtType.STRING) -> {
+                    val blockId = Identifier(tag.getString("block"))
+                    val block = Registry.BLOCK[blockId]
+                    if (block == Blocks.AIR) {
+                        System.err.println("Tried to load PartExt with unknown Block Id: $blockId")
+                        return null
+                    }
+                    if (block !is PartExtProvider) {
+                        System.err.println(
+                            "Tried to load PartExt from Block that cannot provide PartExts. Block Id: $blockId"
+                        )
+                        return null
+                    }
+                    block.partExtType
+                }
+                else -> return null
+            }
+
+            val pos = BlockPos(tag.getInt("x"), tag.getInt("y"), tag.getInt("z"))
+
             val extTag = tag["ext"]
-            if (block is BlockPartProvider && extTag != null) {
-                val ext = block.createExtFromTag(extTag) ?: return null
-                val pos = BlockPos(tag.getInt("x"), tag.getInt("y"), tag.getInt("z"))
-                return NetworkPart(pos, ext)
-            } else return null
+            val ext = type.createExtFromTag(extTag)
+
+            if (ext == null) {
+                System.err.println("Unable to load PartExt with part type: $type, pos: $pos")
+                return null
+            }
+
+            return NetworkPart(pos, ext)
         }
     }
 }
 
-interface BlockPartProvider {
-    fun getPartsInBlock(world: World, pos: BlockPos, state: BlockState): Set<PartExt>
+interface PartExtType {
+    fun createExtsForContainer(world: World, pos: BlockPos, provider: PartExtProvider): Sequence<PartExt>
 
-    fun createExtFromTag(tag: NbtElement): PartExt?
+    fun createExtFromTag(tag: NbtElement?): PartExt?
 }
 
 /**
@@ -364,13 +424,15 @@ interface BlockPartProvider {
  * Kotlin's data class with only `val`s used should do all this automatically, so use that.
  */
 interface PartExt {
+    val type: PartExtType
+
     /**
      * Return the nodes that this node wants to connect to.
      * Will only actually connect if other node also wants to connect to this
      */
     fun tryConnect(self: NetNode, world: ServerWorld, pos: BlockPos, nv: NodeView): Set<NetNode>
 
-    fun toTag(): NbtElement
+    fun toTag(): NbtElement?
 
     /**
      * Node created, removed, connected, disconnected
@@ -381,6 +443,10 @@ interface PartExt {
     override fun hashCode(): Int
 
     override fun equals(other: Any?): Boolean
+}
+
+interface PartExtProvider {
+    val partExtType: PartExtType
 }
 
 class NodeView(world: ServerWorld) {
