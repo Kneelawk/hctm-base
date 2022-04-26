@@ -5,7 +5,7 @@ import net.dblsaiko.hctm.common.graph.Graph
 import net.dblsaiko.hctm.common.graph.Link
 import net.dblsaiko.hctm.common.graph.Node
 import net.fabricmc.fabric.api.util.NbtType
-import net.minecraft.block.Block
+import net.minecraft.block.BlockState
 import net.minecraft.block.Blocks
 import net.minecraft.nbt.NbtCompound
 import net.minecraft.nbt.NbtElement
@@ -43,10 +43,8 @@ class WireNetworkState(val world: ServerWorld) : PersistentState() {
 
 class WireNetworkController(var changeListener: () -> Unit = {}, internal val world: ServerWorld? = null) {
     private val networks = mutableMapOf<UUID, Network>()
-    @JvmSynthetic
-    internal val networksInPos = HashMultimap.create<BlockPos, Network>()
-    @JvmSynthetic
-    internal val nodesToNetworks = mutableMapOf<NetNode, UUID>()
+    @JvmSynthetic internal val networksInPos = HashMultimap.create<BlockPos, Network>()
+    @JvmSynthetic internal val nodesToNetworks = mutableMapOf<NetNode, UUID>()
 
     private var changed = setOf<NetNode>()
 
@@ -364,11 +362,7 @@ data class NetworkPart<T : PartExt>(var pos: BlockPos, val ext: T) {
 
         ext.toTag()?.let { tag.put("ext", it) }
 
-        val typeId = WireRegistries.EXT_PART_TYPE.getId(ext.type)
-        // This would be a programmer error, so better make a loud noise!
-            ?: throw IllegalStateException("Attempted to store unknown PartExtType: ${ext.type}")
-
-        tag.putString("type", typeId.toString())
+        tag.putString("type", ext.typeId.toString())
 
         return tag
     }
@@ -392,7 +386,7 @@ data class NetworkPart<T : PartExt>(var pos: BlockPos, val ext: T) {
                         System.err.println("Tried to load PartExt with unknown Block Id: $blockId")
                         return null
                     }
-                    if (block !is PartExtProvider) {
+                    if (block !is BlockPartProvider) {
                         System.err.println(
                             "Tried to load PartExt from Block that cannot provide PartExts. Block Id: $blockId"
                         )
@@ -418,9 +412,13 @@ data class NetworkPart<T : PartExt>(var pos: BlockPos, val ext: T) {
     }
 }
 
-interface PartExtType {
-    fun createExtsForContainer(world: World, pos: BlockPos, provider: PartExtProvider): Sequence<PartExt>
+interface BlockPartProvider {
+    val partExtType: PartExtType
 
+    fun getPartsInBlock(world: World, pos: BlockPos, state: BlockState): Set<PartExt>
+}
+
+interface PartExtType {
     fun createExtFromTag(tag: NbtElement?): PartExt?
 }
 
@@ -430,7 +428,7 @@ interface PartExtType {
  * Kotlin's data class with only `val`s used should do all this automatically, so use that.
  */
 interface PartExt {
-    val type: PartExtType
+    val typeId: Identifier
 
     /**
      * Return the nodes that this node wants to connect to.
@@ -449,10 +447,6 @@ interface PartExt {
     override fun hashCode(): Int
 
     override fun equals(other: Any?): Boolean
-}
-
-interface PartExtProvider {
-    val partExtType: PartExtType
 }
 
 class NodeView(world: ServerWorld) {

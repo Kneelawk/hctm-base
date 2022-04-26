@@ -4,11 +4,7 @@ import net.dblsaiko.hctm.block.BlockCustomBreak
 import net.dblsaiko.hctm.common.block.ConnectionType.CORNER
 import net.dblsaiko.hctm.common.block.ConnectionType.EXTERNAL
 import net.dblsaiko.hctm.common.block.ConnectionType.INTERNAL
-import net.dblsaiko.hctm.common.wire.PartExt
-import net.dblsaiko.hctm.common.wire.PartExtProvider
-import net.dblsaiko.hctm.common.wire.PartExtType
-import net.dblsaiko.hctm.common.wire.WirePartExt
-import net.dblsaiko.hctm.common.wire.getWireNetworkState
+import net.dblsaiko.hctm.common.wire.*
 import net.minecraft.advancement.criterion.Criteria
 import net.minecraft.block.AbstractBlock
 import net.minecraft.block.Block
@@ -50,7 +46,7 @@ import net.minecraft.world.World
 import net.minecraft.world.WorldAccess
 import net.minecraft.world.WorldView
 
-abstract class BaseWireBlock(settings: AbstractBlock.Settings, val height: Float) : Block(settings), BlockCustomBreak, PartExtProvider, BlockEntityProvider {
+abstract class BaseWireBlock(settings: AbstractBlock.Settings, val height: Float) : Block(settings), BlockCustomBreak, BlockPartProvider, BlockEntityProvider {
 
     val boxes = WireUtils.generateShapes(height.toDouble())
 
@@ -120,7 +116,13 @@ abstract class BaseWireBlock(settings: AbstractBlock.Settings, val height: Float
             world.getWireNetworkState().controller.onChanged(world, pos)
     }
 
+    override fun getPartsInBlock(world: World, pos: BlockPos, state: BlockState): Set<PartExt> {
+        return WireUtils.getOccupiedSides(state).flatMap(::createPartExtsFromSide).toSet()
+    }
+
     abstract override fun createBlockEntity(pos: BlockPos, state: BlockState): BaseWireBlockEntity
+
+    protected abstract fun createPartExtsFromSide(side: Direction): Set<PartExt>
 
     open fun mustConnectInternally() = false
 
@@ -156,30 +158,26 @@ abstract class BaseWireBlock(settings: AbstractBlock.Settings, val height: Float
 
 }
 
-interface BaseWirePartExtType : PartExtType {
-    override fun createExtsForContainer(world: World, pos: BlockPos, provider: PartExtProvider): Sequence<PartExt> {
-        val state = world.getBlockState(pos)
-        return WireUtils.getOccupiedSides(state).asSequence().flatMap(::createPartExtsFromSide)
-    }
+abstract class SingleBaseWireBlock(settings: AbstractBlock.Settings, height: Float) : BaseWireBlock(settings, height) {
 
-    fun createPartExtsFromSide(side: Direction): Sequence<PartExt>
+    override fun createPartExtsFromSide(side: Direction): Set<PartExt> =
+        setOf(createPartExtFromSide(side))
+
+    protected abstract fun createPartExtFromSide(side: Direction): PartExt
+
 }
 
-interface SingleBaseWirePartExtType : BaseWirePartExtType {
+interface SingleBaseWirePartExtType : PartExtType {
     override fun createExtFromTag(tag: NbtElement?): PartExt? {
         return (tag as? NbtByte)
             ?.takeIf { it.intValue() in 0 until 6 }
             ?.let { createPartExtFromSide(Direction.byId(it.intValue())) }
     }
 
-    override fun createPartExtsFromSide(side: Direction): Sequence<PartExt> =
-        sequenceOf(createPartExtFromSide(side))
-
     fun createPartExtFromSide(side: Direction): PartExt
 }
 
-open class BaseWireBlockEntity(type: BlockEntityType<out BlockEntity>, pos: BlockPos, state: BlockState) :
-    BlockEntity(type, pos, state) {
+open class BaseWireBlockEntity(type: BlockEntityType<out BlockEntity>, pos: BlockPos, state: BlockState) : BlockEntity(type, pos, state) {
 
     var connections: Set<WireRepr> = emptySet()
         private set
