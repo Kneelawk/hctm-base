@@ -27,7 +27,7 @@ public abstract class MixinClientPlayerInteractionManager {
         method = "breakBlock(Lnet/minecraft/util/math/BlockPos;)Z",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/block/Block;onBreak(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;Lnet/minecraft/entity/player/PlayerEntity;)V",
+            target = "Lnet/minecraft/block/Block;onBreak(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;Lnet/minecraft/entity/player/PlayerEntity;)Lnet/minecraft/block/BlockState;",
             shift = Shift.BEFORE
         ),
         locals = LocalCapture.CAPTURE_FAILHARD,

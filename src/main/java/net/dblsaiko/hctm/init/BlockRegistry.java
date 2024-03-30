@@ -1,8 +1,9 @@
 package net.dblsaiko.hctm.init;
 
 import net.minecraft.block.Block;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.Registry;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.registry.Registry;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,7 +44,7 @@ public class BlockRegistry {
 
         @Override
         protected T registerNew() {
-            return Registry.register(Registry.BLOCK, this.id(), this.block);
+            return Registry.register(Registries.BLOCK, this.id(), this.block);
         }
     }
 }

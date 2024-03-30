@@ -2,8 +2,8 @@ package net.dblsaiko.hctm.net;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.util.registry.RegistryKey;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.RegistryKeys;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
 
 import net.dblsaiko.hctm.client.wire.ClientNetworkState;
@@ -22,7 +22,7 @@ public class ClientNetHandler {
     }
 
     private void handleDebugNetResponse(MinecraftClient client, ClientPlayNetworkHandler handler, DebugNetResponse msg, PacketSender responseSender) {
-        var world = RegistryKey.of(Registry.WORLD_KEY, msg.world());
+        var world = RegistryKey.of(RegistryKeys.WORLD, msg.world());
         client.execute(() -> ClientNetworkState.INSTANCE.update(world, msg.data()));
     }
 

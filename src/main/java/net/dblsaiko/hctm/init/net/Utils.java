@@ -2,7 +2,7 @@ package net.dblsaiko.hctm.init.net;
 
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtOps;
-import net.minecraft.nbt.NbtTagSizeTracker;
+import net.minecraft.nbt.NbtSizeTracker;
 import net.minecraft.nbt.NbtTypes;
 import net.minecraft.network.PacketByteBuf;
 import com.mojang.serialization.Codec;
@@ -37,7 +37,7 @@ class Utils {
         NbtElement read;
 
         try {
-            read = NbtTypes.byId(type).read(new DataInputStream(new ByteBufInputStream(buf)), 0, new NbtTagSizeTracker(buf.readableBytes()));
+            read = NbtTypes.byId(type).read(new DataInputStream(new ByteBufInputStream(buf)), NbtSizeTracker.of(buf.readableBytes()));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

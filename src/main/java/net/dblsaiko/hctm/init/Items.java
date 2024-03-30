@@ -9,8 +9,8 @@ public class Items {
 
     public final RegistryObject<Item> screwdriver;
 
-    public Items(ItemGroups itemGroups) {
-        this.screwdriver = this.reg.create("screwdriver", new Item(new Item.Settings().group(itemGroups.all)));
+    public Items() {
+        this.screwdriver = this.reg.create("screwdriver", new Item(new Item.Settings()));
     }
 
     public Item getScrewdriver() {

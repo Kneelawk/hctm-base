@@ -4,8 +4,9 @@ import net.minecraft.block.Block;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.Item.Settings;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.Registry;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.registry.Registry;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -65,7 +66,7 @@ public class ItemRegistry {
 
         @Override
         protected T registerNew() {
-            return Registry.register(Registry.ITEM, this.id(), this.item);
+            return Registry.register(Registries.ITEM, this.id(), this.item);
         }
     }
 
@@ -79,7 +80,7 @@ public class ItemRegistry {
 
         @Override
         protected T registerNew() {
-            return Registry.register(Registry.ITEM, this.id(), this.item.get());
+            return Registry.register(Registries.ITEM, this.id(), this.item.get());
         }
     }
 }

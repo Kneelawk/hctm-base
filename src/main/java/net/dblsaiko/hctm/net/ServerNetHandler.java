@@ -1,10 +1,10 @@
 package net.dblsaiko.hctm.net;
 
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.util.registry.RegistryKey;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
 
 import net.dblsaiko.hctm.common.wire.WireNetworkStateKt;
@@ -23,7 +23,7 @@ public class ServerNetHandler {
     }
 
     private void handleDebugNetRequest(MinecraftServer server, ServerPlayerEntity player, ServerPlayNetworkHandler handler, DebugNetRequest msg, PacketSender responseSender) {
-        var worldKey = RegistryKey.of(Registry.WORLD_KEY, msg.world());
+        var worldKey = RegistryKey.of(RegistryKeys.WORLD, msg.world());
         var world = server.getWorld(worldKey);
 
         if (world == null) {

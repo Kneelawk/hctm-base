@@ -4,8 +4,8 @@ import net.dblsaiko.hctm.client.HctmBaseClient
 import net.dblsaiko.hctm.common.wire.WireNetworkController
 import net.dblsaiko.hctm.net.DebugNetRequest
 import net.minecraft.nbt.NbtCompound
+import net.minecraft.registry.RegistryKey
 import net.minecraft.server.world.ServerWorld
-import net.minecraft.util.registry.RegistryKey
 import net.minecraft.world.World
 
 object ClientNetworkState {

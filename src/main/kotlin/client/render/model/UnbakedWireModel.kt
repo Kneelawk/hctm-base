@@ -10,17 +10,14 @@ import net.dblsaiko.hctm.client.render.model.ExtVariant.INTERNAL
 import net.dblsaiko.hctm.client.render.model.ExtVariant.TERMINAL
 import net.dblsaiko.hctm.client.render.model.ExtVariant.UNCONNECTED
 import net.dblsaiko.hctm.client.render.model.ExtVariant.UNCONNECTED_CROSSING
-import net.dblsaiko.qcommon.croco.Mat4
-import net.dblsaiko.qcommon.croco.Vec2
-import net.dblsaiko.qcommon.croco.Vec3
 import net.fabricmc.fabric.api.renderer.v1.Renderer
 import net.fabricmc.fabric.api.renderer.v1.material.RenderMaterial
 import net.fabricmc.fabric.api.renderer.v1.mesh.Mesh
 import net.fabricmc.fabric.api.renderer.v1.mesh.MutableQuadView
 import net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter
 import net.minecraft.client.render.model.BakedModel
+import net.minecraft.client.render.model.Baker
 import net.minecraft.client.render.model.ModelBakeSettings
-import net.minecraft.client.render.model.ModelLoader
 import net.minecraft.client.render.model.UnbakedModel
 import net.minecraft.client.texture.Sprite
 import net.minecraft.client.texture.SpriteAtlasTexture
@@ -41,6 +38,10 @@ import net.minecraft.util.math.Direction.SOUTH
 import net.minecraft.util.math.Direction.UP
 import net.minecraft.util.math.Direction.WEST
 import net.minecraft.util.math.Vec2f
+import org.joml.Matrix4f
+import org.joml.Vector2f
+import org.joml.Vector3f
+import org.joml.Vector4f
 import java.util.concurrent.ConcurrentHashMap
 import java.util.function.Function
 import kotlin.math.atan2
@@ -60,41 +61,41 @@ class UnbakedWireModel(
     private val scaleFactor: Float = textureSize / 16F
 
     // texture positions
-    private val arm1TopUv = Vec2(0.0f, 0.0f)
-    private val arm2TopUv = Vec2(0.0f, armLength + cableWidth) / scaleFactor
-    private val centerTopUv = Vec2(0.0f, armLength) / scaleFactor
-    private val centerTopCUv = Vec2(0.0f, 1.0f) / scaleFactor
-    private val arm1Side1Uv = Vec2(cableWidth, 0.0f) / scaleFactor
-    private val arm2Side1Uv = Vec2(cableWidth, armLength + cableWidth) / scaleFactor
-    private val centerSide1Uv = Vec2(cableWidth, armLength) / scaleFactor
-    private val arm1Side2Uv = Vec2(cableWidth + cableHeight, 0.0f) / scaleFactor
-    private val arm2Side2Uv = Vec2(cableWidth + cableHeight, armLength + cableWidth) / scaleFactor
-    private val centerSide2Uv = Vec2(cableWidth + cableHeight, armLength) / scaleFactor
-    private val arm1BottomUv = Vec2(cableWidth + 2 * cableHeight, 0.0f) / scaleFactor
-    private val arm2BottomUv = Vec2(cableWidth + 2 * cableHeight, armLength + cableWidth) / scaleFactor
-    private val centerBottomUv = Vec2(cableWidth + 2 * cableHeight, armLength) / scaleFactor
-    private val cableFrontUv = Vec2(cableWidth, 1.0f) / scaleFactor
-    private val cableBackUv = Vec2(cableWidth + cableHeight, 1.0f) / scaleFactor
-    private val cornerTop1Uv = Vec2(0.0f, 1.0f + cableWidth) / scaleFactor
-    private val cornerTop2Uv = Vec2(cableWidth + 2 * cableHeight, 1.0f + cableWidth) / scaleFactor
-    private val cornerSide1Uv = Vec2(cableWidth, 1.0f + cableWidth) / scaleFactor
-    private val cornerSide2Uv = Vec2(cableWidth + cableHeight, 1.0f + cableWidth) / scaleFactor
-    private val icornerSide1Uv = Vec2(2 * cableWidth + 2 * cableHeight, 0.0f) / scaleFactor
-    private val icornerSide2Uv = Vec2(2 * cableWidth + 2 * cableHeight, cableHeight) / scaleFactor
-    private val center8Top1Uv = Vec2(0.0f, 0.25f) / scaleFactor
+    private val arm1TopUv = Vector2f(0.0f, 0.0f)
+    private val arm2TopUv = Vector2f(0.0f, armLength + cableWidth) / scaleFactor
+    private val centerTopUv = Vector2f(0.0f, armLength) / scaleFactor
+    private val centerTopCUv = Vector2f(0.0f, 1.0f) / scaleFactor
+    private val arm1Side1Uv = Vector2f(cableWidth, 0.0f) / scaleFactor
+    private val arm2Side1Uv = Vector2f(cableWidth, armLength + cableWidth) / scaleFactor
+    private val centerSide1Uv = Vector2f(cableWidth, armLength) / scaleFactor
+    private val arm1Side2Uv = Vector2f(cableWidth + cableHeight, 0.0f) / scaleFactor
+    private val arm2Side2Uv = Vector2f(cableWidth + cableHeight, armLength + cableWidth) / scaleFactor
+    private val centerSide2Uv = Vector2f(cableWidth + cableHeight, armLength) / scaleFactor
+    private val arm1BottomUv = Vector2f(cableWidth + 2 * cableHeight, 0.0f) / scaleFactor
+    private val arm2BottomUv = Vector2f(cableWidth + 2 * cableHeight, armLength + cableWidth) / scaleFactor
+    private val centerBottomUv = Vector2f(cableWidth + 2 * cableHeight, armLength) / scaleFactor
+    private val cableFrontUv = Vector2f(cableWidth, 1.0f) / scaleFactor
+    private val cableBackUv = Vector2f(cableWidth + cableHeight, 1.0f) / scaleFactor
+    private val cornerTop1Uv = Vector2f(0.0f, 1.0f + cableWidth) / scaleFactor
+    private val cornerTop2Uv = Vector2f(cableWidth + 2 * cableHeight, 1.0f + cableWidth) / scaleFactor
+    private val cornerSide1Uv = Vector2f(cableWidth, 1.0f + cableWidth) / scaleFactor
+    private val cornerSide2Uv = Vector2f(cableWidth + cableHeight, 1.0f + cableWidth) / scaleFactor
+    private val icornerSide1Uv = Vector2f(2 * cableWidth + 2 * cableHeight, 0.0f) / scaleFactor
+    private val icornerSide2Uv = Vector2f(2 * cableWidth + 2 * cableHeight, cableHeight) / scaleFactor
+    private val center8Top1Uv = Vector2f(0.0f, 0.25f) / scaleFactor
     private val center8Top2Uv = arm2TopUv
-    private val center8Bottom1Uv = Vec2(cableWidth + 2 * cableHeight, 0.25f) / scaleFactor
+    private val center8Bottom1Uv = Vector2f(cableWidth + 2 * cableHeight, 0.25f) / scaleFactor
     private val center8Bottom2Uv = arm2BottomUv
-    private val center8Arm1Side1Uv = Vec2(cableWidth, 0.25f) / scaleFactor
-    private val center8Arm1Side2Uv = Vec2(cableWidth + cableHeight, 0.25f) / scaleFactor
+    private val center8Arm1Side1Uv = Vector2f(cableWidth, 0.25f) / scaleFactor
+    private val center8Arm1Side2Uv = Vector2f(cableWidth + cableHeight, 0.25f) / scaleFactor
     private val center8Arm2Side1Uv = arm2Side1Uv
     private val center8Arm2Side2Uv = arm2Side2Uv
-    private val innerTop1Uv = Vec2(0.0f, armInnerSp) / scaleFactor
+    private val innerTop1Uv = Vector2f(0.0f, armInnerSp) / scaleFactor
     private val innerTop2Uv = arm2TopUv
-    private val innerBottom1Uv = Vec2(cableWidth + 2 * cableHeight, armInnerSp) / scaleFactor
+    private val innerBottom1Uv = Vector2f(cableWidth + 2 * cableHeight, armInnerSp) / scaleFactor
     private val innerBottom2Uv = arm2BottomUv
-    private val innerArm1Side1Uv = Vec2(cableWidth, armInnerSp) / scaleFactor
-    private val innerArm1Side2Uv = Vec2(cableWidth + cableHeight, armInnerSp) / scaleFactor
+    private val innerArm1Side1Uv = Vector2f(cableWidth, armInnerSp) / scaleFactor
+    private val innerArm1Side2Uv = Vector2f(cableWidth + cableHeight, armInnerSp) / scaleFactor
     private val innerArm2Side1Uv = arm2Side1Uv
     private val innerArm2Side2Uv = arm2Side2Uv
 
@@ -109,7 +110,7 @@ class UnbakedWireModel(
         Materials(standard, corner)
     }
 
-    override fun bake(ml: ModelLoader, getTexture: Function<SpriteIdentifier, Sprite>, settings: ModelBakeSettings, p3: Identifier): BakedModel {
+    override fun bake(ml: Baker, getTexture: Function<SpriteIdentifier, Sprite>, settings: ModelBakeSettings, p3: Identifier): BakedModel {
         val sid = SpriteIdentifier(SpriteAtlasTexture.BLOCK_ATLAS_TEXTURE, texture)
         val parts = cache.computeIfAbsent(CacheKey(cableWidth, cableHeight, textureSize)) {
             generateParts(RenderData(this.materials))
@@ -155,8 +156,8 @@ class UnbakedWireModel(
         }
 
         box(
-            Vec3(armLength, 0f, armLength),
-            Vec3(1 - armLength, cableHeight, 1 - armLength),
+            Vector3f(armLength, 0f, armLength),
+            Vector3f(1 - armLength, cableHeight, 1 - armLength),
             down = UvCoords(bottomUv, cableWidth / scaleFactor, cableWidth / scaleFactor),
             up = UvCoords(topUv, cableWidth / scaleFactor, cableWidth / scaleFactor)
         ).transform(getExtGenInfo(side, Direction.from(axis, POSITIVE)).first).into(builder.emitter, d.materials.standard)
@@ -203,8 +204,8 @@ class UnbakedWireModel(
             val uvFront = cableFrontUv.takeIf { variant in setOf(EXTERNAL, TERMINAL) }
 
             box(
-                Vec3(armLength, 0f, 1 - armLength),
-                Vec3(1 - armLength, cableHeight, 1 - armLength + baseLength),
+                Vector3f(armLength, 0f, 1 - armLength),
+                Vector3f(1 - armLength, cableHeight, 1 - armLength + baseLength),
                 down = UvCoords(uvBottom, cableWidth / scaleFactor, baseLength / scaleFactor),
                 up = UvCoords(uvTop, cableWidth / scaleFactor, baseLength / scaleFactor),
                 south = uvFront?.let { UvCoords(uvFront, cableHeight / scaleFactor, cableWidth / scaleFactor, MutableQuadView.BAKE_ROTATE_90 + MutableQuadView.BAKE_FLIP_U) },
@@ -215,8 +216,8 @@ class UnbakedWireModel(
             when (variant) {
                 INTERNAL -> {
                     box(
-                        Vec3(armLength, 0f, 1 - cableHeight),
-                        Vec3(1 - armLength, cableHeight, 1f),
+                        Vector3f(armLength, 0f, 1 - cableHeight),
+                        Vector3f(1 - armLength, cableHeight, 1f),
                         up = UvCoords(cableFrontUv, cableHeight / scaleFactor, cableWidth / scaleFactor, MutableQuadView.BAKE_ROTATE_90),
                         west = UvCoords(icornerSide1Uv, cableHeight / scaleFactor, cableHeight / scaleFactor, MutableQuadView.BAKE_ROTATE_180),
                         east = UvCoords(icornerSide2Uv, cableHeight / scaleFactor, cableHeight / scaleFactor, MutableQuadView.BAKE_ROTATE_180)
@@ -224,8 +225,8 @@ class UnbakedWireModel(
                 }
                 CORNER -> {
                     box(
-                        Vec3(armLength, 0f, 1f),
-                        Vec3(1 - armLength, cableHeight, 1 + cableHeight),
+                        Vector3f(armLength, 0f, 1f),
+                        Vector3f(1 - armLength, cableHeight, 1 + cableHeight),
                         up = UvCoords(cornerTop1Uv, cableWidth / scaleFactor, cableHeight / scaleFactor),
                         south = UvCoords(cornerTop2Uv, cableWidth / scaleFactor, cableHeight / scaleFactor),
                         west = UvCoords(cornerSide1Uv, cableHeight / scaleFactor, cableHeight / scaleFactor, MutableQuadView.BAKE_FLIP_V),
@@ -239,8 +240,8 @@ class UnbakedWireModel(
                         if (!swapUnconnectedSides) MutableQuadView.BAKE_ROTATE_90 + MutableQuadView.BAKE_FLIP_U else MutableQuadView.BAKE_ROTATE_270
                     )
                     box(
-                        Vec3(armLength, 0f, armLength),
-                        Vec3(1 - armLength, cableHeight, 1 - armLength),
+                        Vector3f(armLength, 0f, armLength),
+                        Vector3f(1 - armLength, cableHeight, 1 - armLength),
                         south = coords
                     ).transform(mat).into(builder.emitter, d.materials.standard)
                 }
@@ -271,8 +272,8 @@ class UnbakedWireModel(
             val uvFront = cableBackUv.takeIf { variant in setOf(EXTERNAL, TERMINAL) }
 
             box(
-                Vec3(origin.x, 0f, armLength - baseLength),
-                Vec3(1 - armLength, cableHeight, armLength),
+                Vector3f(origin.x, 0f, armLength - baseLength),
+                Vector3f(1 - armLength, cableHeight, armLength),
                 down = UvCoords(uvBottom, cableWidth / scaleFactor, baseLength / scaleFactor),
                 up = UvCoords(uvTop, cableWidth / scaleFactor, baseLength / scaleFactor),
                 north = uvFront?.let { UvCoords(uvFront, cableHeight / scaleFactor, cableWidth / scaleFactor, MutableQuadView.BAKE_ROTATE_90 + MutableQuadView.BAKE_FLIP_U) },
@@ -283,8 +284,8 @@ class UnbakedWireModel(
             when (variant) {
                 INTERNAL -> {
                     box(
-                        Vec3(armLength, 0f, 0f),
-                        Vec3(1 - armLength, cableHeight, cableHeight),
+                        Vector3f(armLength, 0f, 0f),
+                        Vector3f(1 - armLength, cableHeight, cableHeight),
                         up = UvCoords(cableBackUv, cableHeight / scaleFactor, cableWidth / scaleFactor, MutableQuadView.BAKE_ROTATE_90 + MutableQuadView.BAKE_FLIP_U),
                         west = UvCoords(icornerSide1Uv, cableHeight / scaleFactor, cableHeight / scaleFactor, MutableQuadView.BAKE_FLIP_V),
                         east = UvCoords(icornerSide2Uv, cableHeight / scaleFactor, cableHeight / scaleFactor, MutableQuadView.BAKE_FLIP_V)
@@ -292,8 +293,8 @@ class UnbakedWireModel(
                 }
                 CORNER -> {
                     box(
-                        Vec3(armLength, 0f, -cableHeight),
-                        Vec3(1 - armLength, cableHeight, 0f),
+                        Vector3f(armLength, 0f, -cableHeight),
+                        Vector3f(1 - armLength, cableHeight, 0f),
                         up = UvCoords(cornerTop2Uv, cableWidth / scaleFactor, cableHeight / scaleFactor, MutableQuadView.BAKE_FLIP_V),
                         north = UvCoords(cornerTop1Uv, cableWidth / scaleFactor, cableHeight / scaleFactor),
                         west = UvCoords(cornerSide1Uv, cableHeight / scaleFactor, cableHeight / scaleFactor, MutableQuadView.BAKE_ROTATE_180),
@@ -307,8 +308,8 @@ class UnbakedWireModel(
                         if (!swapUnconnectedSides) MutableQuadView.BAKE_ROTATE_90 + MutableQuadView.BAKE_FLIP_U else MutableQuadView.BAKE_ROTATE_270
                     )
                     box(
-                        Vec3(armLength, 0f, armLength),
-                        Vec3(1 - armLength, cableHeight, 1 - armLength),
+                        Vector3f(armLength, 0f, armLength),
+                        Vector3f(1 - armLength, cableHeight, 1 - armLength),
                         north = coords
                     ).transform(mat).into(builder.emitter, d.materials.standard)
                 }
@@ -320,26 +321,23 @@ class UnbakedWireModel(
         return builder.build()
     }
 
-    override fun getTextureDependencies(function: Function<Identifier, UnbakedModel>?, set: MutableSet<com.mojang.datafixers.util.Pair<String, String>>?): Collection<SpriteIdentifier> {
-        return setOf(SpriteIdentifier(SpriteAtlasTexture.BLOCK_ATLAS_TEXTURE, texture))
-    }
-
     override fun getModelDependencies() = emptySet<Identifier>()
-
+    
+    override fun setParents(modelLoader: Function<Identifier, UnbakedModel>?) {}
 }
 
 private data class RenderData(val materials: Materials)
 
 private data class Materials(val standard: RenderMaterial, val corner: RenderMaterial)
 
-private data class UvCoords(val uv: Vec2, val twidth: Float, val theight: Float, val flags: Int = 0)
+private data class UvCoords(val uv: Vector2f, val twidth: Float, val theight: Float, val flags: Int = 0)
 
 private data class Vertex(val x: Float, val y: Float, val z: Float, val u: Float, val v: Float) {
 
-    constructor(xyz: Vec3, u: Float, v: Float) : this(xyz.x, xyz.y, xyz.z, u, v)
+    constructor(xyz: Vector3f, u: Float, v: Float) : this(xyz.x, xyz.y, xyz.z, u, v)
 
-    fun transform(mat: Mat4): Vertex {
-        val vec = mat.mul(Vec3(x, y, z))
+    fun transform(mat: Matrix4f): Vertex {
+        val vec = mat.transform(Vector4f(x, y, z, 1f))
         return Vertex(vec.x, vec.y, vec.z, u, v)
     }
 
@@ -350,7 +348,7 @@ private data class Quad(val v1: Vertex, val v2: Vertex, val v3: Vertex, val v4: 
     fun sort(face: Direction): Quad {
         val all = listOf(v1, v2, v3, v4)
 
-        val center = Vec3((v1.x + v2.x + v3.x + v4.x) / 4, (v1.y + v2.y + v3.y + v4.y) / 4, (v1.z + v2.z + v3.z + v4.z) / 4)
+        val center = Vector3f((v1.x + v2.x + v3.x + v4.x) / 4, (v1.y + v2.y + v3.y + v4.y) / 4, (v1.z + v2.z + v3.z + v4.z) / 4)
 
         val (v1, v2, v3, v4) = all.sortedBy {
             when (face.axis) {
@@ -375,7 +373,7 @@ private data class Quad(val v1: Vertex, val v2: Vertex, val v3: Vertex, val v4: 
         qe.emit()
     }
 
-    fun transform(mat: Mat4) = Quad(
+    fun transform(mat: Matrix4f) = Quad(
         v1.transform(mat),
         v2.transform(mat),
         v3.transform(mat),
@@ -384,16 +382,16 @@ private data class Quad(val v1: Vertex, val v2: Vertex, val v3: Vertex, val v4: 
 
 }
 
-private fun quad(face: Direction, xy1: Vec2, xy2: Vec2, depth: Float, uv: Vec2, twidth: Float, theight: Float, flags: Int): List<Quad> {
+private fun quad(face: Direction, xy1: Vector2f, xy2: Vector2f, depth: Float, uv: Vector2f, twidth: Float, theight: Float, flags: Int): List<Quad> {
     val depth = if (face.direction == NEGATIVE) depth else 1 - depth
 
-    fun toVec3(x: Float, y: Float): Vec3 = when (face.axis) {
-        X -> Vec3(depth, y, x)
-        Y -> Vec3(x, depth, y)
-        Z -> Vec3(x, y, depth)
+    fun toVec3(x: Float, y: Float): Vector3f = when (face.axis) {
+        X -> Vector3f(depth, y, x)
+        Y -> Vector3f(x, depth, y)
+        Z -> Vector3f(x, y, depth)
     }
 
-    val (uv1, uv2, uv3, uv4) = listOf(Vec2(uv.x, uv.y + theight), Vec2(uv.x + twidth, uv.y + theight), Vec2(uv.x + twidth, uv.y), Vec2(uv.x, uv.y))
+    val (uv1, uv2, uv3, uv4) = listOf(Vector2f(uv.x, uv.y + theight), Vector2f(uv.x + twidth, uv.y + theight), Vector2f(uv.x + twidth, uv.y), Vector2f(uv.x, uv.y))
         .let { (v1, v2, v3, v4) -> if (flags and MutableQuadView.BAKE_FLIP_U != 0) listOf(v2, v1, v4, v3) else listOf(v1, v2, v3, v4) }
         .let { l -> if (flags and MutableQuadView.BAKE_FLIP_V != 0) l.reversed() else l }
         .let { (it + it).subList(flags and 3, (flags and 3) + 4) }
@@ -408,7 +406,7 @@ private fun quad(face: Direction, xy1: Vec2, xy2: Vec2, depth: Float, uv: Vec2, 
     )
 }
 
-private fun box(min: Vec3, max: Vec3, down: UvCoords? = null, up: UvCoords? = null, north: UvCoords? = null, south: UvCoords? = null, west: UvCoords? = null, east: UvCoords? = null): List<Quad> {
+private fun box(min: Vector3f, max: Vector3f, down: UvCoords? = null, up: UvCoords? = null, north: UvCoords? = null, south: UvCoords? = null, west: UvCoords? = null, east: UvCoords? = null): List<Quad> {
     val quads = mutableListOf<Quad>()
 
     if (down != null) quads += quad(DOWN, min.xz, max.xz, min.y, down.uv, down.twidth, down.theight, down.flags)
@@ -421,7 +419,7 @@ private fun box(min: Vec3, max: Vec3, down: UvCoords? = null, up: UvCoords? = nu
     return quads
 }
 
-private fun getExtGenInfo(side: Direction, edge: Direction): Pair<Mat4, AxisDirection> {
+private fun getExtGenInfo(side: Direction, edge: Direction): Pair<Matrix4f, AxisDirection> {
     val rotAxis = Axis.values().single { it != side.axis && it != edge.axis }
     var rot = 0
 
@@ -435,7 +433,7 @@ private fun getExtGenInfo(side: Direction, edge: Direction): Pair<Mat4, AxisDire
         rot += 1
     }
 
-    var mat = Mat4.IDENTITY
+    var mat = Matrix4f()
 
     mat = mat.translate(0.5f, 0.5f, 0.5f)
     mat = when (rotAxis) {
@@ -456,7 +454,7 @@ private fun getExtGenInfo(side: Direction, edge: Direction): Pair<Mat4, AxisDire
 
 private fun Collection<Quad>.into(qe: QuadEmitter, mat: RenderMaterial) = forEach { it.into(qe, mat) }
 
-private fun Collection<Quad>.transform(mat: Mat4) = map { it.transform(mat) }
+private fun Collection<Quad>.transform(mat: Matrix4f) = map { it.transform(mat) }
 
 enum class CenterVariant {
     CROSSING,

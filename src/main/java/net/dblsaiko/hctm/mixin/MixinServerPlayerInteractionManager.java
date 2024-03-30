@@ -32,15 +32,15 @@ public abstract class MixinServerPlayerInteractionManager {
         method = "tryBreakBlock",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/block/Block;onBreak(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;Lnet/minecraft/entity/player/PlayerEntity;)V",
+            target = "Lnet/minecraft/block/Block;onBreak(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;Lnet/minecraft/entity/player/PlayerEntity;)Lnet/minecraft/block/BlockState;",
             shift = Shift.BEFORE
         ),
         locals = LocalCapture.CAPTURE_FAILHARD,
         cancellable = true
     )
-    private void tryBreakBlock(BlockPos blockPos, CallbackInfoReturnable<Boolean> cir, BlockState blockState, BlockEntity blockEntity, Block block) {
+    private void tryBreakBlock(BlockPos pos, CallbackInfoReturnable<Boolean> cir, BlockEntity blockEntity, Block block, BlockState blockState) {
         if (block instanceof BlockCustomBreak) {
-            if (!((BlockCustomBreak) block).tryBreak(blockState, blockPos, world, player, blockEntity)) {
+            if (!((BlockCustomBreak) block).tryBreak(blockState, pos, world, player, blockEntity)) {
                 cir.setReturnValue(false);
             }
         }

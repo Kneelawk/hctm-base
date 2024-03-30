@@ -7,13 +7,14 @@ import net.dblsaiko.hctm.common.graph.Node
 import net.fabricmc.fabric.api.util.NbtType
 import net.minecraft.block.Block
 import net.minecraft.block.BlockState
+import net.minecraft.datafixer.DataFixTypes
 import net.minecraft.nbt.NbtCompound
 import net.minecraft.nbt.NbtElement
 import net.minecraft.nbt.NbtList
+import net.minecraft.registry.Registries
 import net.minecraft.server.world.ServerWorld
 import net.minecraft.util.Identifier
 import net.minecraft.util.math.BlockPos
-import net.minecraft.util.registry.Registry
 import net.minecraft.world.PersistentState
 import net.minecraft.world.World
 import java.util.*
@@ -32,6 +33,10 @@ class WireNetworkState(val world: ServerWorld) : PersistentState() {
     }
 
     companion object {
+        fun getType(world: ServerWorld): Type<WireNetworkState> {
+            return Type({ WireNetworkState(world) }, { load(it, world) }, null)
+        }
+        
         fun load(tag: NbtCompound, world: ServerWorld): WireNetworkState {
             val state = WireNetworkState(world)
             state.controller = WireNetworkController.fromTag(tag, world)
@@ -335,13 +340,13 @@ data class NetworkPart<T : PartExt>(var pos: BlockPos, val ext: T) {
         tag.putInt("y", pos.y)
         tag.putInt("z", pos.z)
         tag.put("ext", ext.toTag())
-        tag.putString("block", Registry.BLOCK.getId(block).toString())
+        tag.putString("block", Registries.BLOCK.getId(block).toString())
         return tag
     }
 
     companion object {
         fun fromTag(tag: NbtCompound): NetworkPart<PartExt>? {
-            val block = Registry.BLOCK[Identifier(tag.getString("block"))]
+            val block = Registries.BLOCK[Identifier(tag.getString("block"))]
             val extTag = tag["ext"]
             if (block is BlockPartProvider && extTag != null) {
                 val ext = block.createExtFromTag(extTag) ?: return null
@@ -390,9 +395,5 @@ class NodeView(world: ServerWorld) {
 }
 
 fun ServerWorld.getWireNetworkState(): WireNetworkState {
-    return persistentStateManager.getOrCreate(
-        { WireNetworkState.load(it, this) },
-        { WireNetworkState(this) },
-        "wirenet"
-    )
+    return persistentStateManager.getOrCreate(WireNetworkState.getType(this), "wirenet")
 }

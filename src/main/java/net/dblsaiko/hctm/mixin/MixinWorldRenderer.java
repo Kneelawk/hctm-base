@@ -24,7 +24,7 @@ public abstract class MixinWorldRenderer {
     @Shadow private ClientWorld world;
 
     @Shadow
-    private static void drawShapeOutline(MatrixStack matrixStack_1, VertexConsumer vertexConsumer_1, VoxelShape voxelShape_1, double double_1, double double_2, double double_3, float float_1, float float_2, float float_3, float float_4) {}
+    public static void drawShapeOutline(MatrixStack matrices, VertexConsumer vertexConsumer, VoxelShape shape, double offsetX, double offsetY, double offsetZ, float red, float green, float blue, float alpha, boolean colorize) {}
 
     @Inject(
         method = "drawBlockOutline",
@@ -35,7 +35,7 @@ public abstract class MixinWorldRenderer {
         if (!(blockState_1.getBlock() instanceof BlockAdvancedShape)) return;
         BlockAdvancedShape bas = (BlockAdvancedShape) blockState_1.getBlock();
 
-        drawShapeOutline(matrixStack_1, vertexConsumer_1, blockState_1.getOutlineShape(this.world, blockPos_1, ShapeContext.of(entity_1)), (double) blockPos_1.getX() - double_1, (double) blockPos_1.getY() - double_2, (double) blockPos_1.getZ() - double_3, 0.0F, 0.0F, 0.0F, 0.4F);
+        drawShapeOutline(matrixStack_1, vertexConsumer_1, blockState_1.getOutlineShape(this.world, blockPos_1, ShapeContext.of(entity_1)), (double) blockPos_1.getX() - double_1, (double) blockPos_1.getY() - double_2, (double) blockPos_1.getZ() - double_3, 0.0F, 0.0F, 0.0F, 0.4F, true);
         ci.cancel();
     }
 

@@ -20,8 +20,8 @@ import net.minecraft.util.math.Direction
 import net.minecraft.util.math.Direction.Axis.X
 import net.minecraft.util.math.Direction.Axis.Y
 import net.minecraft.util.math.Direction.Axis.Z
+import net.minecraft.util.math.random.Random
 import net.minecraft.world.BlockRenderView
-import java.util.*
 import java.util.function.Supplier
 
 class WireModel(

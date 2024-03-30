@@ -1,7 +1,7 @@
 package net.dblsaiko.hctm.client.render.model
 
-import net.dblsaiko.qcommon.croco.Vec2
-import net.dblsaiko.qcommon.croco.Vec3
+import org.joml.Vector2f
+import org.joml.Vector3f
 
 //val Float.x: Float
 //  get() = this
@@ -21,15 +21,15 @@ import net.dblsaiko.qcommon.croco.Vec3
 //  get() = Vec2(y, x)
 //val Vec3.zx: Vec2
 //  get() = Vec2(z, x)
-val Vec3.xy: Vec2
-    get() = Vec2(x, y)
+val Vector3f.xy: Vector2f
+    get() = Vector2f(x, y)
 
 //val Vec3.yy: Vec2
 //  get() = Vec2(y, y)
-val Vec3.zy: Vec2
-    get() = Vec2(z, y)
-val Vec3.xz: Vec2
-    get() = Vec2(x, z)
+val Vector3f.zy: Vector2f
+    get() = Vector2f(z, y)
+val Vector3f.xz: Vector2f
+    get() = Vector2f(x, z)
 //val Vec3.yz: Vec2
 //  get() = Vec2(y, z)
 //val Vec3.zz: Vec2

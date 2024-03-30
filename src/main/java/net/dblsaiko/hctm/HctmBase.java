@@ -15,8 +15,8 @@ public class HctmBase {
 
     private static HctmBase INSTANCE;
 
-    public final ItemGroups itemGroups = new ItemGroups();
-    public final Items items = new Items(this.itemGroups);
+    public final Items items = new Items();
+    public final ItemGroups itemGroups = new ItemGroups(this.items);
 
     public final Packets packets = new Packets();
     public final ServerNetHandler serverNetHandler = new ServerNetHandler(this.packets);
@@ -26,6 +26,7 @@ public class HctmBase {
     public static void initialize() {
         HctmBase mod = new HctmBase();
         mod.items.register();
+        mod.itemGroups.register();
         mod.serverNetHandler.register();
 
         ServerTickEvents.END_WORLD_TICK.register(world -> {
