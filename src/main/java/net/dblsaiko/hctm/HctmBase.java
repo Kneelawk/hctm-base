@@ -27,7 +27,7 @@ public class HctmBase {
         mod.itemGroups.register();
         mod.serverNetHandler.register();
 
-        WireNetworkKt.getWIRE_NETWORK().register();
+        WireNetworkKt.register();
 
         INSTANCE = mod;
     }

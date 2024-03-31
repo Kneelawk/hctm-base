@@ -29,3 +29,11 @@ class SimpleBaseWireDecoder<N : BlockNode>(private val constructor: (Direction) 
     }
 }
 
+fun register() {
+    WIRE_NETWORK.register()
+    
+    WIRE_NETWORK.addDiscoverer { world, pos ->
+        val state = world.getBlockState(pos)
+        (state.block as? BlockPartProvider)?.getPartsInBlock(world, pos, state).orEmpty()
+    }
+}
