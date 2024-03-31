@@ -438,9 +438,9 @@ private fun getExtGenInfo(side: Direction, edge: Direction): Pair<Matrix4f, Axis
 
     mat.translate(0.5f, 0.5f, 0.5f)
     when (rotAxis) {
-        X -> mat.rotate(rot * PI.toFloat() / 2.0f, 1.0f, 0.0f, 0.0f)
-        Y -> mat.rotate(PI.toFloat() / 2.0f, 0.0f, 0.0f, 1.0f).rotate(-rot * PI.toFloat() / 2.0f, 1.0f, 0.0f, 0.0f)
-        Z -> mat.rotate(-PI.toFloat() / 2.0f, 0.0f, 1.0f, 0.0f).rotate(-rot * PI.toFloat() / 2.0f, 1.0f, 0.0f, 0.0f)
+        X -> mat.rotate(-rot * PI.toFloat() / 2.0f, 1.0f, 0.0f, 0.0f)
+        Y -> mat.rotate(-PI.toFloat() / 2.0f, 0.0f, 0.0f, 1.0f).rotate(rot * PI.toFloat() / 2.0f, 1.0f, 0.0f, 0.0f)
+        Z -> mat.rotate(PI.toFloat() / 2.0f, 0.0f, 1.0f, 0.0f).rotate(rot * PI.toFloat() / 2.0f, 1.0f, 0.0f, 0.0f)
     }
     mat.translate(-0.5f, -0.5f, -0.5f)
 
