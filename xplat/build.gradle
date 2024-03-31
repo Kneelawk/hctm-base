@@ -1,0 +1,96 @@
+plugins {
+    id "org.jetbrains.kotlin.jvm"
+    id "org.jetbrains.gradle.plugin.idea-ext"
+    id "architectury-plugin"
+    id "dev.architectury.loom"
+    id "maven-publish"
+}
+
+group = project.maven_group
+
+base {
+    archivesName = project.archives_base_name
+}
+
+apply from: 'https://dblsaiko.net/pub/gradle/autoversion.gradle'
+
+architectury {
+    common(project.enabled_platforms.split(','))
+}
+
+repositories {
+    maven { url 'https://maven.dblsaiko.net' }
+    // maven { url 'https://maven.terraformersmc.com/releases/' }
+    maven { url 'https://kneelawk.com/maven' }
+}
+
+dependencies {
+    minecraft group: "com.mojang", name: "minecraft", version: minecraft_version
+    mappings group: "net.fabricmc", name: "yarn", version: yarn_mappings, classifier: "v2"
+    modCompileOnly group: "net.fabricmc", name: "fabric-loader", version: fabric_loader_version
+    
+    compileOnly "org.jetbrains.kotlin:kotlin-stdlib"
+
+    modApi group: 'com.kneelawk.graphlib', name: 'core-xplat-intermediary', version: graphlib_version
+}
+
+processResources {
+    inputs.property 'version', project.version
+
+    filesMatching("fabric.mod.json") {
+        expand "version": project.version
+    }
+}
+
+tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
+    kotlinOptions.jvmTarget = '17'
+    kotlinOptions.freeCompilerArgs += '-Xuse-experimental=kotlin.ExperimentalUnsignedTypes'
+    kotlinOptions.freeCompilerArgs += '-Xjvm-default=all'
+}
+
+// ensure that the encoding is set to UTF-8, no matter what the system default is
+// this fixes some edge cases with special characters not displaying correctly
+// see http://yodaconditions.net/blog/fix-for-java-file-encoding-problems-with-gradle.html
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.release = 17
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+
+    withSourcesJar()
+}
+
+jar {
+    from(rootProject.file('LICENSE')) {
+        rename { "" }
+    }
+}
+
+// configure the maven publication
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifactId = "${rootProject.name}-${project.name}-intermediary"
+            // add all the jars that should be included when publishing to maven
+            from components.java
+        }
+    }
+
+    // select the repositories you want to publish to
+    repositories {
+        // uncomment to publish to the local maven
+        // mavenLocal()
+    }
+}
+
+idea.project?.settings {
+    delegateActions {
+        delegateBuildRunToGradle = false
+        testRunner = org.jetbrains.gradle.ext.ActionDelegationConfig.TestRunner.PLATFORM
+    }
+}
+
+apply from: 'https://dblsaiko.net/pub/gradle/publish-slim.gradle'

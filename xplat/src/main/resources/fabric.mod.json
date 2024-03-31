@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "id": "hctm-base",
+  "id": "hctm_base",
   "version": "${version}",
   "name": "HCTM Base",
   "description": "Common library for HCTM",
@@ -12,7 +12,7 @@
     "sources": "https://github.com/2xsaiko/HCTM"
   },
   "license": "MIT",
-  "icon": "assets/hctm-base/icon.png",
+  "icon": "assets/hctm_base/icon.png",
   "environment": "*",
   "entrypoints": {
     "main": ["net.dblsaiko.hctm.HctmBase::initialize"],

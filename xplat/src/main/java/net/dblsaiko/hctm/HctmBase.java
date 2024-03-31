@@ -9,7 +9,7 @@ import net.dblsaiko.hctm.net.Packets;
 import net.dblsaiko.hctm.net.ServerNetHandler;
 
 public class HctmBase {
-    public static final String MOD_ID = "hctm-base";
+    public static final String MOD_ID = "hctm_base";
 
     private static HctmBase INSTANCE;
 
