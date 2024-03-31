@@ -1,17 +1,15 @@
 package net.dblsaiko.hctm.net;
 
-import net.dblsaiko.hctm.init.net.ClientboundMsgSender;
-
 public class ServerNetHandler {
     private final Packets packets;
 
-    public final ClientboundMsgSender<DebugNetResponse> debugNetResponse;
+//    public final ClientboundMsgSender<DebugNetResponse> debugNetResponse;
 
     public ServerNetHandler(Packets packets) {
         this.packets = packets;
 
 //        packets.debugNetRequest.bind(this::handleDebugNetRequest);
-        this.debugNetResponse = packets.debugNetResponse.sender();
+//        this.debugNetResponse = packets.debugNetResponse.sender();
     }
 
 //    private void handleDebugNetRequest(MinecraftServer server, ServerPlayerEntity player, ServerPlayNetworkHandler handler, DebugNetRequest msg, PacketSender responseSender) {
