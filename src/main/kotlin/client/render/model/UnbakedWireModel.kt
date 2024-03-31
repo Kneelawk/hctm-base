@@ -44,6 +44,7 @@ import org.joml.Vector3f
 import org.joml.Vector4f
 import java.util.concurrent.ConcurrentHashMap
 import java.util.function.Function
+import kotlin.math.PI
 import kotlin.math.atan2
 
 class UnbakedWireModel(
@@ -433,16 +434,15 @@ private fun getExtGenInfo(side: Direction, edge: Direction): Pair<Matrix4f, Axis
         rot += 1
     }
 
-    var mat = Matrix4f()
+    val mat = Matrix4f()
 
-    mat = mat.translate(0.5f, 0.5f, 0.5f)
-    mat = when (rotAxis) {
-        X -> mat.rotate(1.0f, 0.0f, 0.0f, rot * 90.0f)
-        Y -> mat.rotate(0.0f, 0.0f, 1.0f, 90.0f).rotate(1.0f, 0.0f, 0.0f, -rot * 90.0f)
-        Z -> mat.rotate(0.0f, 1.0f, 0.0f, -90.0f).rotate(1.0f, 0.0f, 0.0f, -rot * 90.0f)
-        else -> mat
+    mat.translate(0.5f, 0.5f, 0.5f)
+    when (rotAxis) {
+        X -> mat.rotate(rot * PI.toFloat() / 2.0f, 1.0f, 0.0f, 0.0f)
+        Y -> mat.rotate(PI.toFloat() / 2.0f, 0.0f, 0.0f, 1.0f).rotate(-rot * PI.toFloat() / 2.0f, 1.0f, 0.0f, 0.0f)
+        Z -> mat.rotate(-PI.toFloat() / 2.0f, 0.0f, 1.0f, 0.0f).rotate(-rot * PI.toFloat() / 2.0f, 1.0f, 0.0f, 0.0f)
     }
-    mat = mat.translate(-0.5f, -0.5f, -0.5f)
+    mat.translate(-0.5f, -0.5f, -0.5f)
 
     val dir = when (Pair(side, edge.axis)) {
         Pair(WEST, Y), Pair(EAST, Z), Pair(NORTH, X), Pair(NORTH, Y), Pair(UP, X), Pair(UP, Z) -> edge.opposite.direction

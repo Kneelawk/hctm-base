@@ -39,7 +39,7 @@ class WireModel(
 
     fun emitQuads(state: Set<WireRepr>, context: RenderContext) {
         context.pushTransform { quad ->
-            quad.spriteBake(0, particle, MutableQuadView.BAKE_NORMALIZED)
+            quad.spriteBake(particle, MutableQuadView.BAKE_NORMALIZED)
 
             true
         }
