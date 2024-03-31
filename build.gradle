@@ -44,7 +44,7 @@ dependencies {
 //    modImplementation group: "net.dblsaiko.qcommon.croco", name: "croco", version: croco_version
 //    include group: "net.dblsaiko.qcommon.croco", name: "croco", version: croco_version
     
-    modImplementation group: 'com.kneelawk.graphlib', name: 'core-fabric', version: graphlib_version
+    modApi group: 'com.kneelawk.graphlib', name: 'core-fabric', version: graphlib_version
     include group: 'com.kneelawk.graphlib', name: 'core-fabric', version: graphlib_version
     
     modRuntimeOnly group: 'com.kneelawk.graphlib', name: 'debugrender-fabric', version: graphlib_version
