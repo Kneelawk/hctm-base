@@ -1,13 +1,12 @@
 package net.dblsaiko.hctm.common.block
 
+import com.kneelawk.graphlib.api.graph.user.BlockNode
+import com.kneelawk.graphlib.api.graph.user.SidedBlockNode
 import net.dblsaiko.hctm.block.BlockCustomBreak
 import net.dblsaiko.hctm.common.block.ConnectionType.CORNER
 import net.dblsaiko.hctm.common.block.ConnectionType.EXTERNAL
 import net.dblsaiko.hctm.common.block.ConnectionType.INTERNAL
-import net.dblsaiko.hctm.common.wire.BlockPartProvider
-import net.dblsaiko.hctm.common.wire.PartExt
-import net.dblsaiko.hctm.common.wire.WirePartExtType
-import net.dblsaiko.hctm.common.wire.getWireNetworkState
+import net.dblsaiko.hctm.common.wire.*
 import net.minecraft.advancement.criterion.Criteria
 import net.minecraft.block.AbstractBlock
 import net.minecraft.block.Block
@@ -116,16 +115,16 @@ abstract class BaseWireBlock(settings: AbstractBlock.Settings, val height: Float
 
     override fun prepare(state: BlockState, world: WorldAccess, pos: BlockPos, flags: Int, i: Int) {
         if (!world.isClient && world is ServerWorld)
-            world.getWireNetworkState().controller.onBlockChanged(world, pos, state)
+            WIRE_NETWORK.getServerGraphWorld(world).updateNodes(pos)
     }
 
-    override fun getPartsInBlock(world: World, pos: BlockPos, state: BlockState): Set<PartExt> {
+    override fun getPartsInBlock(world: World, pos: BlockPos, state: BlockState): Set<BlockNode> {
         return WireUtils.getOccupiedSides(state).flatMap(::createPartExtsFromSide).toSet()
     }
 
     abstract override fun createBlockEntity(pos: BlockPos, state: BlockState): BaseWireBlockEntity
 
-    protected abstract fun createPartExtsFromSide(side: Direction): Set<PartExt>
+    protected abstract fun createPartExtsFromSide(side: Direction): Set<BlockNode>
 
     open fun mustConnectInternally() = false
 
@@ -163,16 +162,10 @@ abstract class BaseWireBlock(settings: AbstractBlock.Settings, val height: Float
 
 abstract class SingleBaseWireBlock(settings: AbstractBlock.Settings, height: Float) : BaseWireBlock(settings, height) {
 
-    override fun createExtFromTag(tag: NbtElement): PartExt? {
-        return (tag as? NbtByte)
-            ?.takeIf { it.intValue() in 0 until 6 }
-            ?.let { createPartExtFromSide(Direction.byId(it.intValue())) }
-    }
-
-    override fun createPartExtsFromSide(side: Direction): Set<PartExt> =
+    override fun createPartExtsFromSide(side: Direction): Set<BlockNode> =
         setOf(createPartExtFromSide(side))
 
-    protected abstract fun createPartExtFromSide(side: Direction): PartExt
+    protected abstract fun createPartExtFromSide(side: Direction): BlockNode
 
 }
 
@@ -373,18 +366,19 @@ object WireUtils {
         val be = world.getBlockEntity(pos) as? BaseWireBlockEntity ?: return
         val state = world.getBlockState(pos)
         val wb = state.block as BaseWireBlock
-        val net = world.getWireNetworkState().controller
+        val net = WIRE_NETWORK.getServerGraphWorld(world)
 
         val nodes1 = net.getNodesAt(pos)
-            .filter { it.data.ext is WirePartExtType }
-            .groupBy { (it.data.ext as WirePartExtType).side }
+            .filter { it.node is SidedBlockNode }
+            .toList()
+            .groupBy { (it.node as SidedBlockNode).side }
             .mapValues { (side, nodes) ->
                 val c = nodes.flatMap { node ->
                     node.connections.mapNotNull {
                         val other = it.other(node)
-                        if (node.data.pos == other.data.pos && other.data.ext is WirePartExtType) Connection(other.data.ext.side, INTERNAL)
-                        else other.data.pos.subtract(node.data.pos.offset(side)).let { Direction.fromVector(it.x, it.y, it.z) }?.let { Connection(it, CORNER) }
-                            ?: other.data.pos.subtract(node.data.pos).let { Direction.fromVector(it.x, it.y, it.z) }?.let { Connection(it, EXTERNAL) }
+                        if (node.blockPos == other.blockPos && other.node is SidedBlockNode) Connection((other.node as SidedBlockNode).side, INTERNAL)
+                        else other.blockPos.subtract(node.blockPos.offset(side)).let { Direction.fromVector(it.x, it.y, it.z) }?.let { Connection(it, CORNER) }
+                            ?: other.blockPos.subtract(node.blockPos).let { Direction.fromVector(it.x, it.y, it.z) }?.let { Connection(it, EXTERNAL) }
                     }
                 }
                 c.groupBy { it.edge }.mapNotNull { (_, v) -> v.distinct().singleOrNull() }

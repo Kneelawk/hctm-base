@@ -18,13 +18,13 @@ public class ClientNetHandler {
         this.packets = packets;
 
         this.debugNetRequest = packets.debugNetRequest.sender();
-        packets.debugNetResponse.bind(this::handleDebugNetResponse);
+//        packets.debugNetResponse.bind(this::handleDebugNetResponse);
     }
 
-    private void handleDebugNetResponse(MinecraftClient client, ClientPlayNetworkHandler handler, DebugNetResponse msg, PacketSender responseSender) {
-        var world = RegistryKey.of(RegistryKeys.WORLD, msg.world());
-        client.execute(() -> ClientNetworkState.INSTANCE.update(world, msg.data()));
-    }
+//    private void handleDebugNetResponse(MinecraftClient client, ClientPlayNetworkHandler handler, DebugNetResponse msg, PacketSender responseSender) {
+//        var world = RegistryKey.of(RegistryKeys.WORLD, msg.world());
+//        client.execute(() -> ClientNetworkState.INSTANCE.update(world, msg.data()));
+//    }
 
     public void register() {
         this.packets.registerClientHandlers();

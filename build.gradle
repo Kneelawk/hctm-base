@@ -13,6 +13,7 @@ apply from: 'https://dblsaiko.net/pub/gradle/autoversion.gradle'
 repositories {
     maven { url 'https://maven.dblsaiko.net' }
     // maven { url 'https://maven.terraformersmc.com/releases/' }
+    maven { url 'https://kneelawk.com/maven' }
 }
 
 dependencies {
@@ -42,6 +43,12 @@ dependencies {
 //
 //    modImplementation group: "net.dblsaiko.qcommon.croco", name: "croco", version: croco_version
 //    include group: "net.dblsaiko.qcommon.croco", name: "croco", version: croco_version
+    
+    modImplementation group: 'com.kneelawk.graphlib', name: 'core-fabric', version: graphlib_version
+    include group: 'com.kneelawk.graphlib', name: 'core-fabric', version: graphlib_version
+    
+    modRuntimeOnly group: 'com.kneelawk.graphlib', name: 'debugrender-fabric', version: graphlib_version
+    include group: 'com.kneelawk.graphlib', name: 'debugrender-fabric', version: graphlib_version
 
 //    modRuntimeOnly group: 'net.dblsaiko', name: 'winwonders', version: '0.1.2-4'
     // modRuntimeOnly(group: 'com.terraformersmc', name: 'modmenu', version: '2.0.0-beta.7') {
