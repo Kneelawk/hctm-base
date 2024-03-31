@@ -115,7 +115,7 @@ abstract class BaseWireBlock(settings: AbstractBlock.Settings, val height: Float
 
     override fun prepare(state: BlockState, world: WorldAccess, pos: BlockPos, flags: Int, i: Int) {
         if (!world.isClient && world is ServerWorld)
-            WIRE_NETWORK.getServerGraphWorld(world).updateNodes(pos)
+            WIRE_NETWORK.getGraphWorld(world).updateNodes(pos)
     }
 
     override fun getPartsInBlock(world: World, pos: BlockPos, state: BlockState): Set<BlockNode> {
@@ -366,7 +366,7 @@ object WireUtils {
         val be = world.getBlockEntity(pos) as? BaseWireBlockEntity ?: return
         val state = world.getBlockState(pos)
         val wb = state.block as BaseWireBlock
-        val net = WIRE_NETWORK.getServerGraphWorld(world)
+        val net = WIRE_NETWORK.getGraphWorld(world)
 
         val nodes1 = net.getNodesAt(pos)
             .filter { it.node is SidedBlockNode }
