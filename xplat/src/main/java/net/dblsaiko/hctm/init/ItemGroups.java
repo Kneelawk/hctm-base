@@ -15,7 +15,7 @@ public class ItemGroups {
     public final RegistryObject<ItemGroup> all;
 
     public ItemGroups(Items items) {
-        all = reg.create("all", FabricItemGroup.builder()
+        all = reg.create("all", ItemGroup.builder()
             .displayName(Text.translatable("itemGroup.hctm-base.all"))
             .icon(() -> HctmBase.getInstance().items.getScrewdriver().getDefaultStack())
             .entries((displayContext, entries) -> {
