@@ -1,0 +1,21 @@
+modLoader = "javafml"
+loaderVersion = "[1,)"
+license = "MIT"
+
+[[mixins]]
+config = "hctm.mixins.json"
+
+[[mods]]
+modId = "hctm_base"
+version = "${version}"
+displayName = "HCTM Base"
+authors = "2xsaiko"
+description = "Common library for HCTM"
+logoFile = "assets/hctm_base/icon.png"
+
+[[dependencies.hctm_base]]
+modId = "neoforge"
+type = "REQUIRED"
+versionRange = "[20.4.148-beta,)"
+ordering = "NONE"
+side = "BOTH"

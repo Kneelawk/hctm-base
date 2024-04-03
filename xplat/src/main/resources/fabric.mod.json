@@ -15,8 +15,8 @@
   "icon": "assets/hctm_base/icon.png",
   "environment": "*",
   "entrypoints": {
-    "main": ["net.dblsaiko.hctm.HctmBase::initialize"],
-    "client": ["net.dblsaiko.hctm.client.HctmBaseClient::initialize"]
+    "main": ["net.dblsaiko.hctm.fabric.HctmFabric::initialize"],
+    "client": ["net.dblsaiko.hctm.fabric.client.HctmFabricClient::initialize"]
   },
   "mixins": ["hctm.mixins.json"],
   "depends": {

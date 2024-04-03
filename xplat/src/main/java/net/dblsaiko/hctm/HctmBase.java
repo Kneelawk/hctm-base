@@ -23,13 +23,13 @@ public class HctmBase {
 
     public static void initialize() {
         HctmBase mod = new HctmBase();
-        mod.items.register();
-        mod.itemGroups.register();
         mod.serverNetHandler.register();
 
-        WireNetworkKt.register();
-
         INSTANCE = mod;
+    }
+    
+    public static void initializeWireNetwork() {
+        WireNetworkKt.register();
     }
 
     public static HctmBase getInstance() {
