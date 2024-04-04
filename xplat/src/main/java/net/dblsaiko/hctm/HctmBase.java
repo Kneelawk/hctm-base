@@ -22,10 +22,7 @@ public class HctmBase {
     private HctmBase() {}
 
     public static void initialize() {
-        HctmBase mod = new HctmBase();
-        mod.serverNetHandler.register();
-
-        INSTANCE = mod;
+        INSTANCE = new HctmBase();
     }
     
     public static void initializeWireNetwork() {

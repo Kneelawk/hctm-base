@@ -35,8 +35,12 @@ public abstract class AbstractPlatform {
     public static AbstractPlatform getInstance() {
         return INSTANCE;
     }
-    
+
+    public abstract boolean isClientEnvironment();
+
     public abstract ItemRegistry getItemRegistry();
-    
+
     public abstract ItemGroupRegistry getItemGroupRegistry();
+    
+    public abstract NetworkRegistry getNetworkRegistry();
 }

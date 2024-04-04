@@ -15,9 +15,7 @@ public class HctmBaseClient {
     }
 
     public static void initialize() {
-        HctmBaseClient client = new HctmBaseClient(HctmBase.getInstance());
-        client.clientNetHandler.register();
-        INSTANCE = client;
+        INSTANCE = new HctmBaseClient(HctmBase.getInstance());
     }
 
     public static HctmBaseClient getInstance() {

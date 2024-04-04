@@ -16,8 +16,4 @@ public class ClientNetHandler {
 //        var world = RegistryKey.of(RegistryKeys.WORLD, msg.world());
 //        client.execute(() -> ClientNetworkState.INSTANCE.update(world, msg.data()));
 //    }
-
-    public void register() {
-        this.packets.registerClientHandlers();
-    }
 }

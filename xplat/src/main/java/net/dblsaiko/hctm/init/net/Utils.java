@@ -16,32 +16,27 @@ import io.netty.buffer.ByteBufInputStream;
 import io.netty.buffer.ByteBufOutputStream;
 import io.netty.buffer.Unpooled;
 
-class Utils {
-    static <T> PacketByteBuf prepareBuffer(Codec<T> codec, T message) {
-        PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
+public class Utils {
+    public static <T> NbtElement toNbt(Codec<T> codec, T message) {
         DataResult<NbtElement> res = codec.encodeStart(NbtOps.INSTANCE, message);
-        NbtElement el = res.getOrThrow(false, r -> {});
-        buf.writeByte(el.getType());
-
-        try {
-            el.write(new DataOutputStream(new ByteBufOutputStream(buf)));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        return res.getOrThrow(false, r -> {});
+    }
+    
+    public static <T> PacketByteBuf prepareBuffer(Codec<T> codec, T message) {
+        PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
+        NbtElement el = toNbt(codec, message);
+        buf.writeNbt(el);
 
         return buf;
     }
+    
+    public static <T> T fromNbt(Codec<T> codec, NbtElement element) {
+        return codec.parse(NbtOps.INSTANCE, element).getOrThrow(false, e -> {});
+    }
 
-    static <T> T readBuffer(Codec<T> codec, PacketByteBuf buf) {
-        var type = buf.readByte();
-        NbtElement read;
+    public static <T> T readBuffer(Codec<T> codec, PacketByteBuf buf) {
+        NbtElement read = buf.readNbt();
 
-        try {
-            read = NbtTypes.byId(type).read(new DataInputStream(new ByteBufInputStream(buf)), NbtSizeTracker.of(buf.readableBytes()));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        return codec.parse(NbtOps.INSTANCE, read).getOrThrow(false, e -> {});
+        return fromNbt(codec, read);
     }
 }

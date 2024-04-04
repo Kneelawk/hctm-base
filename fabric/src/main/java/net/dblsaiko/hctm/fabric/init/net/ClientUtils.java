@@ -1,4 +1,7 @@
-package net.dblsaiko.hctm.init.net;
+package net.dblsaiko.hctm.fabric.init.net;
+
+import net.dblsaiko.hctm.init.net.ClientMessageHandler;
+import net.dblsaiko.hctm.init.net.Utils;
 
 import net.minecraft.util.Identifier;
 import com.mojang.serialization.Codec;
@@ -10,7 +13,7 @@ class ClientUtils {
     static <T> void registerHandler(Identifier id, Codec<T> codec, ClientMessageHandler<T> handler) {
         ClientPlayNetworking.registerGlobalReceiver(id, (client, handler1, buf, responseSender) -> {
             var message = Utils.readBuffer(codec, buf);
-            handler.handle(client, handler1, message, responseSender);
+            handler.handle(client, message, new FabricPacketSender(responseSender));
         });
     }
 }

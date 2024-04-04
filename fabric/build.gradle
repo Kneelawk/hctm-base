@@ -1,8 +1,8 @@
 plugins {
-    id "org.jetbrains.kotlin.jvm"
-    id "org.jetbrains.gradle.plugin.idea-ext"
     id "architectury-plugin"
     id "dev.architectury.loom"
+    id "org.jetbrains.kotlin.jvm"
+    id "org.jetbrains.gradle.plugin.idea-ext"
     id "com.github.johnrengelman.shadow"
     id "maven-publish"
 }
@@ -119,6 +119,7 @@ sourcesJar.configure {
 publishing {
     publications {
         mavenJava(MavenPublication) {
+            artifactId = "${rootProject.name}-${project.name}"
             // add all the jars that should be included when publishing to maven
             from components.java
         }

@@ -1,8 +1,8 @@
 plugins {
-    id "org.jetbrains.kotlin.jvm"
-    id "org.jetbrains.gradle.plugin.idea-ext"
     id "architectury-plugin"
     id "dev.architectury.loom"
+    id "org.jetbrains.kotlin.jvm"
+    id "org.jetbrains.gradle.plugin.idea-ext"
     id "com.github.johnrengelman.shadow"
     id "maven-publish"
 }

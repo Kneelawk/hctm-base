@@ -25,8 +25,4 @@ public class ServerNetHandler {
 //
 //        this.debugNetResponse.send(responseSender, new DebugNetResponse(msg.world(), nbt));
 //    }
-
-    public void register() {
-        this.packets.registerServerHandlers();
-    }
 }
