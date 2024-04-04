@@ -1,35 +1,8 @@
 package net.dblsaiko.hctm.mixin;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.client.render.model.ModelLoader;
-import net.minecraft.client.render.model.MultipartUnbakedModel;
-import net.minecraft.client.render.model.UnbakedModel;
-import net.minecraft.client.render.model.json.ModelVariantMap;
-import net.minecraft.client.util.ModelIdentifier;
-import net.minecraft.resource.ResourceManager;
-import net.minecraft.state.StateManager;
-import net.minecraft.util.Identifier;
-import com.mojang.datafixers.util.Pair;
-
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Supplier;
-
-import com.google.common.collect.ImmutableList;
-import kotlin.jvm.functions.Function2;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.At.Shift;
-import org.spongepowered.asm.mixin.injection.Coerce;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
-import net.dblsaiko.hctm.client.render.model.ModelWrapperHandler;
-import net.dblsaiko.hctm.ext.ModelDefinitionExt;
+import net.minecraft.client.render.model.ModelLoader;
 
 @Mixin(ModelLoader.class)
 public abstract class ModelLoaderMixin {

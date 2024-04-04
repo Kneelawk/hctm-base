@@ -1,18 +1,12 @@
 plugins {
+    id "java"
+    id "org.jetbrains.kotlin.jvm" apply false
     id "architectury-plugin"
     id "dev.architectury.loom" apply false
-    id "org.jetbrains.kotlin.jvm"
 }
 
 architectury {
     minecraft = project.minecraft_version
-}
-
-idea.project?.settings {
-    delegateActions {
-        delegateBuildRunToGradle = false
-        testRunner = org.jetbrains.gradle.ext.ActionDelegationConfig.TestRunner.PLATFORM
-    }
 }
 
 allprojects {

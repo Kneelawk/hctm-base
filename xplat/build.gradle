@@ -1,7 +1,8 @@
 plugins {
+    id "java"
+    id "org.jetbrains.kotlin.jvm"
     id "architectury-plugin"
     id "dev.architectury.loom"
-    id "org.jetbrains.kotlin.jvm"
     id "org.jetbrains.gradle.plugin.idea-ext"
     id "maven-publish"
 }
@@ -9,7 +10,7 @@ plugins {
 group = project.maven_group
 
 base {
-    archivesName = project.archives_base_name
+    archivesName = project.archives_base_name + "-xplat"
 }
 
 apply from: 'https://dblsaiko.net/pub/gradle/autoversion.gradle'
@@ -28,7 +29,7 @@ dependencies {
     minecraft group: "com.mojang", name: "minecraft", version: minecraft_version
     mappings group: "net.fabricmc", name: "yarn", version: yarn_mappings, classifier: "v2"
     modCompileOnly group: "net.fabricmc", name: "fabric-loader", version: fabric_loader_version
-    
+
     compileOnly "org.jetbrains.kotlin:kotlin-stdlib"
 
     modApi group: 'com.kneelawk.graphlib', name: 'core-xplat-intermediary', version: graphlib_version
@@ -65,7 +66,7 @@ java {
 
 jar {
     from(rootProject.file('LICENSE')) {
-        rename { "" }
+        rename { "${it}_${archives_base_name}" }
     }
 }
 
@@ -83,13 +84,6 @@ publishing {
     repositories {
         // uncomment to publish to the local maven
         // mavenLocal()
-    }
-}
-
-idea.project?.settings {
-    delegateActions {
-        delegateBuildRunToGradle = false
-        testRunner = org.jetbrains.gradle.ext.ActionDelegationConfig.TestRunner.PLATFORM
     }
 }
 

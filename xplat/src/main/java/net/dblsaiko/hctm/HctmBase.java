@@ -24,7 +24,7 @@ public class HctmBase {
     public static void initialize() {
         INSTANCE = new HctmBase();
     }
-    
+
     public static void initializeWireNetwork() {
         WireNetworkKt.register();
     }
