@@ -1,5 +1,7 @@
 package net.dblsaiko.hctm.neoforge.init;
 
+import java.util.function.Supplier;
+
 import net.dblsaiko.hctm.init.ItemGroupRegistry;
 import net.dblsaiko.hctm.init.RegistryObject;
 import net.neoforged.bus.api.IEventBus;
@@ -20,8 +22,8 @@ public class ItemGroupRegistryNeoForge implements ItemGroupRegistry {
     }
 
     @Override
-    public @NotNull <T extends ItemGroup> RegistryObject<T> create(String name, T itemGroup) {
-        return new RegistryObjectImpl<>(register.register(name, () -> itemGroup));
+    public @NotNull <T extends ItemGroup> RegistryObject<T> create(String name, Supplier<T> itemGroup) {
+        return new RegistryObjectImpl<>(register.register(name, itemGroup));
     }
 
     public void register(IEventBus modBus) {

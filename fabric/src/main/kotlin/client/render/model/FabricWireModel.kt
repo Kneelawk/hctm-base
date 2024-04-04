@@ -1,5 +1,7 @@
-package net.dblsaiko.hctm.client.render.model
+package net.dblsaiko.hctm.fabric.client.render.model
 
+import net.dblsaiko.hctm.client.render.model.CenterVariant
+import net.dblsaiko.hctm.client.render.model.ExtVariant
 import net.dblsaiko.hctm.common.block.BaseWireBlockEntity
 import net.dblsaiko.hctm.common.block.Connection
 import net.dblsaiko.hctm.common.block.ConnectionType

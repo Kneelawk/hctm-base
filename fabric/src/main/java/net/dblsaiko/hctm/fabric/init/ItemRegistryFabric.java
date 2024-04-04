@@ -34,15 +34,7 @@ public class ItemRegistryFabric implements ItemRegistry {
 
     @Override
     @NotNull
-    public <T extends Item> RegistryObject<T> create(String name, T item) {
-        var o = new RegistryObjectImpl<>(new Identifier(this.modId, name), item);
-        this.all.add(o);
-        return o;
-    }
-
-    @Override
-    @NotNull
-    public <T extends Item> RegistryObject<T> createThen(String name, Supplier<T> item) {
+    public <T extends Item> RegistryObject<T> create(String name, Supplier<T> item) {
         var o = new DeferredRegistryObjectImpl<>(new Identifier(this.modId, name), item);
         this.all.add(o);
         return o;
@@ -51,7 +43,7 @@ public class ItemRegistryFabric implements ItemRegistry {
     @Override
     @NotNull
     public RegistryObject<BlockItem> create(String name, RegistryObject<? extends Block> block) {
-        return this.createThen(name, () -> new BlockItem(block.get(), this.blockDefault));
+        return this.create(name, () -> new BlockItem(block.get(), this.blockDefault));
     }
 
     public void register() {
@@ -60,20 +52,6 @@ public class ItemRegistryFabric implements ItemRegistry {
 
     public void unregister() {
         this.all.forEach(InternalRegistryObject::unregister);
-    }
-
-    private static final class RegistryObjectImpl<T extends Item> extends AbstractRegistryObject<T> {
-        private final T item;
-
-        private RegistryObjectImpl(Identifier id, T item) {
-            super(id);
-            this.item = item;
-        }
-
-        @Override
-        protected T registerNew() {
-            return Registry.register(Registries.ITEM, this.id(), this.item);
-        }
     }
 
     private static final class DeferredRegistryObjectImpl<T extends Item> extends AbstractRegistryObject<T> {

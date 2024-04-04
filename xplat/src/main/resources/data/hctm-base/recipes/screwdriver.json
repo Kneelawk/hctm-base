@@ -5,7 +5,7 @@
     "d": { "item": "minecraft:blue_dye" }, "i": { "item": "minecraft:iron_ingot" }, "P": { "tag": "minecraft:planks" }
   },
   "result": {
-    "item": "hctm-base:screwdriver",
+    "item": "hctm_base:screwdriver",
     "count": 1
   }
 }

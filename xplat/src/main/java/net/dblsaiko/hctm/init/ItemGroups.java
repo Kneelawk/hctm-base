@@ -9,8 +9,8 @@ public class ItemGroups {
 
     public ItemGroups(Items items) {
         ItemGroupRegistry reg = AbstractPlatform.getInstance().getItemGroupRegistry();
-        all = reg.create("all", ItemGroup.create(ItemGroup.Row.TOP, 0)
-            .displayName(Text.translatable("itemGroup.hctm-base.all"))
+        all = reg.create("all", () -> ItemGroup.create(ItemGroup.Row.TOP, 0)
+            .displayName(Text.translatable("itemGroup.hctm_base.all"))
             .icon(() -> items.getScrewdriver().getDefaultStack())
             .entries((displayContext, entries) -> {
                 entries.add(items.getScrewdriver());

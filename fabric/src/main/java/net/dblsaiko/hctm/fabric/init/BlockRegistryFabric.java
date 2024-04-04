@@ -7,6 +7,7 @@ import net.minecraft.util.Identifier;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 import net.dblsaiko.hctm.init.BlockRegistry;
 import net.dblsaiko.hctm.init.RegistryObject;
@@ -24,7 +25,7 @@ public class BlockRegistryFabric implements BlockRegistry {
 
     @Override
     @NotNull
-    public <T extends Block> RegistryObject<T> create(String name, T block) {
+    public <T extends Block> RegistryObject<T> create(String name, Supplier<T> block) {
         RegistryObjectImpl<T> o = new RegistryObjectImpl<>(new Identifier(this.modId, name), block);
         this.all.add(o);
         return o;
@@ -39,16 +40,16 @@ public class BlockRegistryFabric implements BlockRegistry {
     }
 
     private static final class RegistryObjectImpl<T extends Block> extends AbstractRegistryObject<T> {
-        private final T block;
+        private final Supplier<T> block;
 
-        private RegistryObjectImpl(Identifier id, T block) {
+        private RegistryObjectImpl(Identifier id, Supplier<T> block) {
             super(id);
             this.block = block;
         }
 
         @Override
         protected T registerNew() {
-            return Registry.register(Registries.BLOCK, this.id(), this.block);
+            return Registry.register(Registries.BLOCK, this.id(), this.block.get());
         }
     }
 }

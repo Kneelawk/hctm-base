@@ -8,7 +8,7 @@ public class Items {
 
     public Items() {
         ItemRegistry reg = AbstractPlatform.getInstance().getItemRegistry();
-        this.screwdriver = reg.create("screwdriver", new Item(new Item.Settings()));
+        this.screwdriver = reg.create("screwdriver", () -> new Item(new Item.Settings()));
     }
 
     public Item getScrewdriver() {

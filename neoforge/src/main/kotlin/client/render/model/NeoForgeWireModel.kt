@@ -1,4 +1,4 @@
-package net.dblsaiko.hctm.client.render.model
+package net.dblsaiko.hctm.neoforge.client.render.model
 
 import net.dblsaiko.hctm.client.render.model.CenterVariant
 import net.dblsaiko.hctm.client.render.model.ExtVariant

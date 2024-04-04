@@ -1,5 +1,7 @@
 package net.dblsaiko.hctm.neoforge.init;
 
+import java.util.function.Supplier;
+
 import net.dblsaiko.hctm.init.BlockRegistry;
 import net.dblsaiko.hctm.init.RegistryObject;
 import net.neoforged.bus.api.IEventBus;
@@ -19,8 +21,8 @@ public class BlockRegistryNeoForge implements BlockRegistry {
     }
 
     @Override
-    public @NotNull <T extends Block> RegistryObject<T> create(String name, T block) {
-        return new RegistryObjectImpl<>(register.register(name, () -> block));
+    public @NotNull <T extends Block> RegistryObject<T> create(String name, Supplier<T> block) {
+        return new RegistryObjectImpl<>(register.register(name, block));
     }
     
     public void register(IEventBus modBus) {

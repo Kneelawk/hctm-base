@@ -27,14 +27,9 @@ public class ItemRegistryNeoForge implements ItemRegistry {
         items = DeferredRegister.createItems(modId);
         this.blockDefault = blockDefault;
     }
-    
-    @Override
-    public @NotNull <T extends Item> RegistryObject<T> create(String name, T item) {
-        return new RegistryObjectImpl<>(items.register(name, () -> item));
-    }
 
     @Override
-    public @NotNull <T extends Item> RegistryObject<T> createThen(String name, Supplier<T> item) {
+    public @NotNull <T extends Item> RegistryObject<T> create(String name, Supplier<T> item) {
         return new RegistryObjectImpl<>(items.register(name, item));
     }
 

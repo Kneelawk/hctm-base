@@ -1,5 +1,6 @@
-package net.dblsaiko.hctm.client.render.model
+package net.dblsaiko.hctm.fabric.client.render.model
 
+import net.dblsaiko.hctm.client.render.model.*
 import net.fabricmc.fabric.api.renderer.v1.Renderer
 import net.fabricmc.fabric.api.renderer.v1.material.MaterialFinder
 import net.fabricmc.fabric.api.renderer.v1.mesh.Mesh
@@ -10,7 +11,9 @@ import net.minecraft.client.texture.Sprite
 import net.minecraft.util.math.Direction
 import java.util.concurrent.ConcurrentHashMap
 
-class FabricWireModelFactory(private val renderer: Renderer, private val cache: ConcurrentHashMap<CacheKey, FabricWireModelParts>) : WireModelFactory {
+class FabricWireModelFactory(
+    private val renderer: Renderer, private val cache: ConcurrentHashMap<CacheKey, FabricWireModelParts>
+) : WireModelFactory {
     override fun build(sprite: Sprite, cacheKey: CacheKey, builder: WireModelBuilder): BakedModel {
         val parts = cache.computeIfAbsent(cacheKey) {
             val ctx = FabricWireModelBuildCtx(renderer)

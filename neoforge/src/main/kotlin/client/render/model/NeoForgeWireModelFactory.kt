@@ -1,5 +1,6 @@
-package net.dblsaiko.hctm.client.render.model
+package net.dblsaiko.hctm.neoforge.client.render.model
 
+import net.dblsaiko.hctm.client.render.model.*
 import net.minecraft.client.render.model.BakedModel
 import net.minecraft.client.render.model.BakedQuad
 import net.minecraft.client.texture.Sprite
