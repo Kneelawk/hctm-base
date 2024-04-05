@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "package": "net.dblsaiko.hctm.neoforge.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+  ],
+  "client": [
+    "MixinClientPlayerInteractionManager"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

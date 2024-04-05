@@ -1,4 +1,4 @@
-package net.dblsaiko.hctm.mixin;
+package net.dblsaiko.hctm.fabric.mixin;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -39,8 +39,8 @@ public abstract class MixinServerPlayerInteractionManager {
         cancellable = true
     )
     private void tryBreakBlock(BlockPos pos, CallbackInfoReturnable<Boolean> cir, BlockEntity blockEntity, Block block, BlockState blockState) {
-        if (block instanceof BlockCustomBreak) {
-            if (!((BlockCustomBreak) block).tryBreak(blockState, pos, world, player, blockEntity)) {
+        if (block instanceof BlockCustomBreak custom) {
+            if (!custom.tryBreak(blockState, pos, world, player, blockEntity)) {
                 cir.setReturnValue(false);
             }
         }

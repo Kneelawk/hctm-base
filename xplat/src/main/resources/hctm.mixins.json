@@ -1,12 +1,9 @@
 {
   "required": true,
   "package": "net.dblsaiko.hctm.mixin",
-  "compatibilityLevel": "JAVA_8",
-  "mixins": [
-    "MixinServerPlayerInteractionManager"
-  ],
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [ ],
   "client": [
-    "MixinClientPlayerInteractionManager",
     "MixinGameRenderer",
     "ModelLoaderMixin",
     "MixinWorldRenderer"

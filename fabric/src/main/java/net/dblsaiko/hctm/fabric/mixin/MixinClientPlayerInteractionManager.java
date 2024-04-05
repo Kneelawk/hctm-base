@@ -1,4 +1,4 @@
-package net.dblsaiko.hctm.mixin;
+package net.dblsaiko.hctm.fabric.mixin;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;

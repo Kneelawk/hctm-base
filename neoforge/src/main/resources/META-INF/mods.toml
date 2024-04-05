@@ -5,6 +5,9 @@ license = "MIT"
 [[mixins]]
 config = "hctm.mixins.json"
 
+[[mixins]]
+config = "hctm.neoforge.mixins.json"
+
 [[mods]]
 modId = "hctm_base"
 version = "${version}"
