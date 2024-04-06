@@ -126,6 +126,8 @@ class UnbakedWireModel(
             down = UvCoords(bottomUv, cableWidth / scaleFactor, cableWidth / scaleFactor),
             up = UvCoords(topUv, cableWidth / scaleFactor, cableWidth / scaleFactor)
         ).transform(getExtGenInfo(side, Direction.from(axis, POSITIVE)).first).into(builder, d.materials.standardAO)
+
+        builder.finish()
     }
 
     private fun generateExt(builder: QuadMeshBuilder, d: RenderData, side: Direction, edge: Direction, variant: ExtVariant) {
@@ -281,6 +283,8 @@ class UnbakedWireModel(
                 }
             }
         }
+
+        builder.finish()
     }
 
     override fun getModelDependencies() = emptySet<Identifier>()
@@ -333,7 +337,6 @@ private data class Quad(val v1: Vertex, val v2: Vertex, val v3: Vertex, val v4: 
         }
         
         qe.aoEnabled(matAO)
-        qe.finish()
     }
 
     fun transform(mat: Matrix4f) = Quad(
