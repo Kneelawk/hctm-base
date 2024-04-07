@@ -266,12 +266,12 @@ open class BaseWireItem(block: BaseWireBlock, settings: Item.Settings) : BlockIt
     private fun placePart(ctx: ItemPlacementContext, state: BlockState): Boolean {
         val old = ctx.world.getBlockState(ctx.blockPos)
         val combined = tryFit(old, state) ?: return false
-        return this.place(ctx, combined)
+        return super.place(ctx, combined)
     }
 
     private fun placeBlock(ctx: ItemPlacementContext, state: BlockState): Boolean {
         if (!ctx.canPlace()) return false
-        return this.place(ctx, state)
+        return super.place(ctx, state)
     }
 
     private fun doPlace(ctx: ItemPlacementContext, state: BlockState): Boolean {
