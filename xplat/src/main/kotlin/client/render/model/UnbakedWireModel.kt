@@ -298,13 +298,14 @@ private data class Materials(val standardAO: Boolean, val cornerAO: Boolean)
 
 private data class UvCoords(val uv: Vector2f, val twidth: Float, val theight: Float, val flags: Int = 0)
 
-private data class Vertex(val x: Float, val y: Float, val z: Float, val u: Float, val v: Float) {
+private data class Vertex(val x: Float, val y: Float, val z: Float, val u: Float, val v: Float, val nx: Float, val ny: Float, val nz: Float) {
 
-    constructor(xyz: Vector3f, u: Float, v: Float) : this(xyz.x, xyz.y, xyz.z, u, v)
+    constructor(xyz: Vector3f, u: Float, v: Float, normal: Vector3f) : this(xyz.x, xyz.y, xyz.z, u, v, normal.x, normal.y, normal.z)
 
     fun transform(mat: Matrix4f): Vertex {
         val vec = mat.transform(Vector4f(x, y, z, 1f))
-        return Vertex(vec.x, vec.y, vec.z, u, v)
+        val norm = mat.transform(Vector4f(nx, ny, nz, 0f))
+        return Vertex(vec.x, vec.y, vec.z, u, v, norm.x, norm.y, norm.z)
     }
 
 }
@@ -332,6 +333,7 @@ private data class Quad(val v1: Vertex, val v2: Vertex, val v3: Vertex, val v4: 
         for (q in listOf(v1, v2, v3, v4)) {
             qe.color(-1)
             qe.pos(q.x, q.y, q.z)
+            qe.normal(q.nx, q.ny, q.nz)
             qe.uv(q.u, q.v)
             qe.emitVertex()
         }
@@ -365,10 +367,10 @@ private fun quad(face: Direction, xy1: Vector2f, xy2: Vector2f, depth: Float, uv
 
     return listOf(
         Quad(
-            Vertex(toVec3(xy1.x, xy1.y), uv1.x, uv1.y),
-            Vertex(toVec3(xy2.x, xy1.y), uv2.x, uv2.y),
-            Vertex(toVec3(xy2.x, xy2.y), uv3.x, uv3.y),
-            Vertex(toVec3(xy1.x, xy2.y), uv4.x, uv4.y)
+            Vertex(toVec3(xy1.x, xy1.y), uv1.x, uv1.y, face.unitVector),
+            Vertex(toVec3(xy2.x, xy1.y), uv2.x, uv2.y, face.unitVector),
+            Vertex(toVec3(xy2.x, xy2.y), uv3.x, uv3.y, face.unitVector),
+            Vertex(toVec3(xy1.x, xy2.y), uv4.x, uv4.y, face.unitVector)
         ).sort(face)
     )
 }
