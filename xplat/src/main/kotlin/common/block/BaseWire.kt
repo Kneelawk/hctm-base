@@ -21,9 +21,7 @@ import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.item.BlockItem
 import net.minecraft.item.Item
 import net.minecraft.item.ItemPlacementContext
-import net.minecraft.nbt.NbtByte
 import net.minecraft.nbt.NbtCompound
-import net.minecraft.nbt.NbtElement
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket
 import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.server.world.ServerWorld
@@ -263,21 +261,21 @@ open class BaseWireItem(block: BaseWireBlock, settings: Item.Settings) : BlockIt
         return v2.fold(state) { s, side -> s.with(BaseWireProperties.PLACED_WIRES.getValue(side), true) }
     }
 
-    private fun placePart(ctx: ItemPlacementContext, state: BlockState): Boolean {
+    private fun tryPlacePart(ctx: ItemPlacementContext, state: BlockState): Boolean {
         val old = ctx.world.getBlockState(ctx.blockPos)
         val combined = tryFit(old, state) ?: return false
         return super.place(ctx, combined)
     }
 
-    private fun placeBlock(ctx: ItemPlacementContext, state: BlockState): Boolean {
+    private fun tryPlaceBlock(ctx: ItemPlacementContext, state: BlockState): Boolean {
         if (!ctx.canPlace()) return false
         return super.place(ctx, state)
     }
 
     private fun doPlace(ctx: ItemPlacementContext, state: BlockState): Boolean {
         if (
-            !placePart(ctx, state) &&
-            !placeBlock(ctx, state)
+            !tryPlacePart(ctx, state) &&
+            !tryPlaceBlock(ctx, state)
         ) return false
 
         val pos = ctx.blockPos
