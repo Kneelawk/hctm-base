@@ -11,13 +11,17 @@ import net.minecraft.client.render.RenderLayer
 import net.minecraft.client.render.model.BakedModel
 import net.minecraft.client.render.model.BakedQuad
 import net.minecraft.client.render.model.json.ModelOverrideList
+import net.minecraft.client.render.model.json.ModelTransformation
+import net.minecraft.client.render.model.json.Transformation
 import net.minecraft.client.texture.Sprite
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Direction
+import net.minecraft.util.math.MathHelper
 import net.minecraft.util.math.random.Random
 import net.minecraft.world.BlockRenderView
 import net.neoforged.neoforge.client.model.data.ModelData
 import net.neoforged.neoforge.client.model.data.ModelProperty
+import org.joml.Vector3f
 
 class NeoForgeWireModel(val particle: Sprite, val parts: NeoForgeWireModelParts) : BakedModel {
     override fun getQuads(state: BlockState?, face: Direction?, random: Random) = emitQuads(getItemWireState())
@@ -126,6 +130,8 @@ class NeoForgeWireModel(val particle: Sprite, val parts: NeoForgeWireModelParts)
     }
 
     override fun useAmbientOcclusion() = true
+    
+    override fun getTransformation() = ModelHelper.MODEL_TRANSFORM_BLOCK
 
     override fun hasDepth() = true
 
@@ -148,4 +154,41 @@ data class WireReprsProperty(val reprs: Set<WireRepr>) {
     companion object {
         val property = ModelProperty<WireReprsProperty>()
     }
+}
+
+object ModelHelper {
+
+    /**
+     * The vanilla model transformation logic is closely coupled with model deserialization.
+     * That does little good for modded model loaders and procedurally generated models.
+     * This convenient construction method applies the same scaling factors used for vanilla models.
+     * This means you can use values from a vanilla JSON file as inputs to this method.
+     */
+    private fun makeTransform(
+        rotationX: Float, rotationY: Float, rotationZ: Float, translationX: Float, translationY: Float,
+        translationZ: Float, scaleX: Float, scaleY: Float, scaleZ: Float
+    ): Transformation {
+        val translation = Vector3f(translationX, translationY, translationZ)
+        translation.mul(0.0625f)
+        translation[MathHelper.clamp(translation.x, -5.0f, 5.0f), MathHelper.clamp(translation.y, -5.0f, 5.0f)] =
+            MathHelper.clamp(translation.z, -5.0f, 5.0f)
+        return Transformation(Vector3f(rotationX, rotationY, rotationZ), translation, Vector3f(scaleX, scaleY, scaleZ))
+    }
+    
+    val TRANSFORM_BLOCK_GUI: Transformation = makeTransform(30f, 225f, 0f, 0f, 0f, 0f, 0.625f, 0.625f, 0.625f)
+    val TRANSFORM_BLOCK_GROUND: Transformation = makeTransform(0f, 0f, 0f, 0f, 3f, 0f, 0.25f, 0.25f, 0.25f)
+    val TRANSFORM_BLOCK_FIXED: Transformation = makeTransform(0f, 0f, 0f, 0f, 0f, 0f, 0.5f, 0.5f, 0.5f)
+    val TRANSFORM_BLOCK_3RD_PERSON_RIGHT: Transformation = makeTransform(75f, 45f, 0f, 0f, 2.5f, 0f, 0.375f, 0.375f, 0.375f)
+    val TRANSFORM_BLOCK_1ST_PERSON_RIGHT: Transformation = makeTransform(0f, 45f, 0f, 0f, 0f, 0f, 0.4f, 0.4f, 0.4f)
+    val TRANSFORM_BLOCK_1ST_PERSON_LEFT: Transformation = makeTransform(0f, 225f, 0f, 0f, 0f, 0f, 0.4f, 0.4f, 0.4f)
+
+    /**
+     * Mimics the vanilla model transformation used for most vanilla blocks,
+     * and should be suitable for most custom block-like models.
+     */
+    val MODEL_TRANSFORM_BLOCK: ModelTransformation = ModelTransformation(
+        TRANSFORM_BLOCK_3RD_PERSON_RIGHT, TRANSFORM_BLOCK_3RD_PERSON_RIGHT, TRANSFORM_BLOCK_1ST_PERSON_LEFT,
+        TRANSFORM_BLOCK_1ST_PERSON_RIGHT, Transformation.IDENTITY, TRANSFORM_BLOCK_GUI, TRANSFORM_BLOCK_GROUND,
+        TRANSFORM_BLOCK_FIXED
+    )
 }
