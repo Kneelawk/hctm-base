@@ -46,6 +46,8 @@ interface QuadMeshBuilder {
     fun lightmap(lightmap: Int)
     
     fun emitVertex()
+    
+    fun emitQuad()
 
     fun aoEnabled(aoEnabled: Boolean)
 

@@ -1,10 +1,11 @@
 package net.dblsaiko.hctm.neoforge.init.net;
 
+import net.dblsaiko.hctm.init.net.MsgPayload;
 import net.dblsaiko.hctm.init.net.ServerMessageHandler;
 import net.dblsaiko.hctm.init.net.ServerboundMsgDef;
 import net.dblsaiko.hctm.init.net.ServerboundMsgSender;
 import net.dblsaiko.hctm.init.net.Utils;
-import net.neoforged.neoforge.network.handling.PlayPayloadContext;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import com.mojang.serialization.Codec;
 
@@ -38,9 +39,9 @@ public class ServerboundMsgDefNeoForge<T> implements ServerboundMsgDef<T> {
         return this.sender;
     }
 
-    public void handle(MsgPayload payload, PlayPayloadContext ctx) {
-        PlayerEntity player = ctx.player().get();
+    public void handle(MsgPayload payload, IPayloadContext ctx) {
+        PlayerEntity player = ctx.player();
         handler.handle(player.getServer(), (ServerPlayerEntity) player, Utils.fromNbt(codec, payload.element()),
-            new NeoForgePacketSender(ctx.replyHandler()));
+            new NeoForgePacketSender(ctx::reply));
     }
 }

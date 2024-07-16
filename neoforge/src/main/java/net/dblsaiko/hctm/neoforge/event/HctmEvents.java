@@ -2,6 +2,7 @@ package net.dblsaiko.hctm.neoforge.event;
 
 import net.dblsaiko.hctm.block.BlockCustomBreak;
 import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.event.level.BlockEvent;
 
@@ -13,7 +14,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.GameMode;
 import net.minecraft.world.World;
 
-@Mod.EventBusSubscriber
+@EventBusSubscriber
 public class HctmEvents {
     @SubscribeEvent
     public static void onBlockBreak(BlockEvent.BreakEvent event) {

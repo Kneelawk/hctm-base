@@ -1,7 +1,10 @@
 package net.dblsaiko.hctm.neoforge.init.net;
 
-import net.dblsaiko.hctm.init.net.PacketSender;
-import net.neoforged.neoforge.network.handling.IReplyHandler;
+import java.util.function.Consumer;
 
-public record NeoForgePacketSender(IReplyHandler handler) implements PacketSender {
+import net.dblsaiko.hctm.init.net.PacketSender;
+
+import net.minecraft.network.packet.CustomPayload;
+
+public record NeoForgePacketSender(Consumer<CustomPayload> handler) implements PacketSender {
 }

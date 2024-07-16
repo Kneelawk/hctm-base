@@ -35,7 +35,7 @@ public class ItemRegistryFabric implements ItemRegistry {
     @Override
     @NotNull
     public <T extends Item> RegistryObject<T> create(String name, Supplier<T> item) {
-        var o = new DeferredRegistryObjectImpl<>(new Identifier(this.modId, name), item);
+        var o = new DeferredRegistryObjectImpl<>(Identifier.of(this.modId, name), item);
         this.all.add(o);
         return o;
     }

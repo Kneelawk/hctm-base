@@ -23,7 +23,7 @@ public class NetworkRegistryFabric implements NetworkRegistry {
 
     @Override public <T> ServerboundMsgDef<T> registerServerbound(String name, Codec<T> codec) {
         this.checkUnregistered(this.sbDefs, name);
-        Identifier id = new Identifier(this.modId, name);
+        Identifier id = Identifier.of(this.modId, name);
         ServerboundMsgDefFabric<T> def = new ServerboundMsgDefFabric<>(id, codec);
         this.sbDefs.put(name, def);
         return def;
@@ -31,7 +31,7 @@ public class NetworkRegistryFabric implements NetworkRegistry {
 
     @Override public <T> ClientboundMsgDef<T> registerClientbound(String name, Codec<T> codec) {
         this.checkUnregistered(this.cbDefs, name);
-        Identifier id = new Identifier(this.modId, name);
+        Identifier id = Identifier.of(this.modId, name);
         ClientboundMsgDefFabric<T> def = new ClientboundMsgDefFabric<>(id, codec);
         this.cbDefs.put(name, def);
         return def;

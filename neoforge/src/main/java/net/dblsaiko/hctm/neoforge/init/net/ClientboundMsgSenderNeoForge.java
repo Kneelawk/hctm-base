@@ -1,6 +1,7 @@
 package net.dblsaiko.hctm.neoforge.init.net;
 
 import net.dblsaiko.hctm.init.net.ClientboundMsgSender;
+import net.dblsaiko.hctm.init.net.MsgPayload;
 import net.dblsaiko.hctm.init.net.PacketSender;
 import net.dblsaiko.hctm.init.net.Utils;
 import net.neoforged.neoforge.network.PacketDistributor;
@@ -21,11 +22,11 @@ public class ClientboundMsgSenderNeoForge<T> implements ClientboundMsgSender<T> 
 
     @Override
     public void send(ServerPlayerEntity player, T message) {
-        PacketDistributor.PLAYER.with(player).send(new MsgPayload(id, Utils.toNbt(codec, message)));
+        PacketDistributor.sendToPlayer(player, new MsgPayload(id, Utils.toNbt(codec, message)));
     }
 
     @Override
     public void send(PacketSender sender, T message) {
-        ((NeoForgePacketSender) sender).handler().send(new MsgPayload(id, Utils.toNbt(codec, message)));
+        ((NeoForgePacketSender) sender).handler().accept(new MsgPayload(id, Utils.toNbt(codec, message)));
     }
 }

@@ -1,5 +1,6 @@
 package net.dblsaiko.hctm.fabric.init.net;
 
+import net.dblsaiko.hctm.init.net.MsgPayload;
 import net.dblsaiko.hctm.init.net.ServerMessageHandler;
 import net.dblsaiko.hctm.init.net.ServerboundMsgDef;
 import net.dblsaiko.hctm.init.net.ServerboundMsgSender;
@@ -44,9 +45,9 @@ public class ServerboundMsgDefFabric<T> implements ServerboundMsgDef<T> {
             throw new IllegalStateException("Handler for packet '%s' not bound".formatted(this.id));
         }
 
-        ServerPlayNetworking.registerGlobalReceiver(this.id, (server, player, handler1, buf, responseSender) -> {
-            var message = Utils.readBuffer(this.codec, buf);
-            handler.handle(server, player, message, new FabricPacketSender(responseSender));
+        ServerPlayNetworking.registerGlobalReceiver(MsgPayload.id(id), (payload, ctx) -> {
+            var message = Utils.fromNbt(codec, payload.element());
+            handler.handle(ctx.server(), ctx.player(), message, new FabricPacketSender(ctx.responseSender()));
         });
     }
 }

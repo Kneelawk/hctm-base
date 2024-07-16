@@ -26,7 +26,7 @@ public class ItemGroupRegistryFabric implements ItemGroupRegistry {
     @Override
     @NotNull
     public <T extends ItemGroup> RegistryObject<T> create(String name, Supplier<T> itemGroup) {
-        RegistryObjectImpl<T> o = new RegistryObjectImpl<>(new Identifier(this.modId, name), itemGroup);
+        RegistryObjectImpl<T> o = new RegistryObjectImpl<>(Identifier.of(this.modId, name), itemGroup);
         this.all.add(o);
         return o;
     }

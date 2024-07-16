@@ -86,9 +86,12 @@ class FabricQuadMeshBuilder(
     override fun emitVertex() {
         if (++vertexIndex >= 4) {
             vertexIndex = 0
-            emitter.material(materialFinder.clear().ambientOcclusion(TriState.of(aoEnabled)).find())
-            emitter.emit()
         }
+    }
+
+    override fun emitQuad() {
+        emitter.material(materialFinder.clear().ambientOcclusion(TriState.of(aoEnabled)).find())
+        emitter.emit()
     }
 
     override fun finish() {

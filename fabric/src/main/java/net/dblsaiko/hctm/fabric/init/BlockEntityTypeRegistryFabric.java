@@ -28,7 +28,7 @@ public class BlockEntityTypeRegistryFabric implements BlockEntityTypeRegistry {
     @Override
     public <T extends BlockEntity> RegistryObject<BlockEntityType<T>> create(String name, Factory<T> factory,
                                                                              RegistryObject<? extends Block>... blocks) {
-        RegistryObjectImpl<T> o = new RegistryObjectImpl<>(new Identifier(this.modId, name), factory, blocks);
+        RegistryObjectImpl<T> o = new RegistryObjectImpl<>(Identifier.of(this.modId, name), factory, blocks);
         // noinspection unchecked
         this.all.add((InternalRegistryObject<BlockEntityType<? extends BlockEntity>>) (Object) o);
         return o;
@@ -38,7 +38,7 @@ public class BlockEntityTypeRegistryFabric implements BlockEntityTypeRegistry {
     public <T extends BlockEntity> RegistryObject<BlockEntityType<T>> create(String name, FactoryWithType<T> factory,
                                                                              RegistryObject<? extends Block>... blocks) {
         RegistryObjectImplWithType<T> o =
-            new RegistryObjectImplWithType<>(new Identifier(this.modId, name), factory, blocks);
+            new RegistryObjectImplWithType<>(Identifier.of(this.modId, name), factory, blocks);
         // noinspection unchecked
         this.all.add((InternalRegistryObject<BlockEntityType<? extends BlockEntity>>) (Object) o);
         return o;

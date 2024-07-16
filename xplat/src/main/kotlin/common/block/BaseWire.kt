@@ -23,6 +23,7 @@ import net.minecraft.item.Item
 import net.minecraft.item.ItemPlacementContext
 import net.minecraft.nbt.NbtCompound
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket
+import net.minecraft.registry.RegistryWrapper.WrapperLookup
 import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.server.world.ServerWorld
 import net.minecraft.sound.SoundCategory
@@ -172,13 +173,13 @@ open class BaseWireBlockEntity(type: BlockEntityType<out BlockEntity>, pos: Bloc
     var connections: Set<WireRepr> = emptySet()
         private set
 
-    override fun writeNbt(tag: NbtCompound) {
-        super.writeNbt(tag)
+    override fun writeNbt(tag: NbtCompound, lookup: WrapperLookup) {
+        super.writeNbt(tag, lookup)
         tag.putLong("c", serConnections())
     }
 
-    override fun readNbt(tag: NbtCompound) {
-        super.readNbt(tag)
+    override fun readNbt(tag: NbtCompound, lookup: WrapperLookup) {
+        super.readNbt(tag, lookup)
         deserConnections(tag.getLong("c"))
         val world = getWorld()
 
@@ -191,8 +192,8 @@ open class BaseWireBlockEntity(type: BlockEntityType<out BlockEntity>, pos: Bloc
         return BlockEntityUpdateS2CPacket.create(this)
     }
 
-    override fun toInitialChunkDataNbt(): NbtCompound {
-        return createNbt()
+    override fun toInitialChunkDataNbt(lookup: WrapperLookup): NbtCompound {
+        return createNbt(lookup)
     }
 
     // data structure:

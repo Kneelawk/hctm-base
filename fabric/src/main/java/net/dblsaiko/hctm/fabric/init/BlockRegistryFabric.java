@@ -26,7 +26,7 @@ public class BlockRegistryFabric implements BlockRegistry {
     @Override
     @NotNull
     public <T extends Block> RegistryObject<T> create(String name, Supplier<T> block) {
-        RegistryObjectImpl<T> o = new RegistryObjectImpl<>(new Identifier(this.modId, name), block);
+        RegistryObjectImpl<T> o = new RegistryObjectImpl<>(Identifier.of(this.modId, name), block);
         this.all.add(o);
         return o;
     }

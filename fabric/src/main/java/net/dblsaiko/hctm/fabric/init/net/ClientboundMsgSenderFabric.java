@@ -1,6 +1,7 @@
 package net.dblsaiko.hctm.fabric.init.net;
 
 import net.dblsaiko.hctm.init.net.ClientboundMsgSender;
+import net.dblsaiko.hctm.init.net.MsgPayload;
 import net.dblsaiko.hctm.init.net.PacketSender;
 import net.dblsaiko.hctm.init.net.Utils;
 
@@ -19,10 +20,10 @@ public class ClientboundMsgSenderFabric<T>implements ClientboundMsgSender<T> {
     }
 
     @Override public void send(ServerPlayerEntity player, T message) {
-        ServerPlayNetworking.send(player, this.id, Utils.prepareBuffer(this.codec, message));
+        ServerPlayNetworking.send(player, new MsgPayload(id, Utils.toNbt(codec, message)));
     }
 
     @Override public void send(PacketSender sender, T message) {
-        ((FabricPacketSender) sender).sender().sendPacket(this.id, Utils.prepareBuffer(this.codec, message));
+        ((FabricPacketSender) sender).sender().sendPacket(new MsgPayload(id, Utils.toNbt(codec, message)));
     }
 }

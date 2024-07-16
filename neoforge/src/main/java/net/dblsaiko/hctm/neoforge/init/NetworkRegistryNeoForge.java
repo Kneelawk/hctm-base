@@ -9,14 +9,15 @@ import net.dblsaiko.hctm.init.NetworkRegistry;
 import net.dblsaiko.hctm.init.net.ClientboundMsgDef;
 import net.dblsaiko.hctm.init.net.ServerboundMsgDef;
 import net.dblsaiko.hctm.neoforge.init.net.ClientboundMsgDefNeoForge;
-import net.dblsaiko.hctm.neoforge.init.net.MsgPayload;
+import net.dblsaiko.hctm.init.net.MsgPayload;
 import net.dblsaiko.hctm.neoforge.init.net.ServerboundMsgDefNeoForge;
 import net.neoforged.bus.api.IEventBus;
-import net.neoforged.neoforge.network.event.RegisterPayloadHandlerEvent;
-import net.neoforged.neoforge.network.registration.IPayloadRegistrar;
+import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
+import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 
 import com.mojang.serialization.Codec;
 
+import net.minecraft.network.NetworkSide;
 import net.minecraft.util.Identifier;
 
 public class NetworkRegistryNeoForge implements NetworkRegistry {
@@ -32,7 +33,7 @@ public class NetworkRegistryNeoForge implements NetworkRegistry {
     @Override
     public <T> ServerboundMsgDef<T> registerServerbound(String name, Codec<T> codec) {
         this.checkUnregistered(this.sbDefs, name);
-        Identifier id = new Identifier(this.modId, name);
+        Identifier id = Identifier.of(this.modId, name);
         ServerboundMsgDefNeoForge<T> def = new ServerboundMsgDefNeoForge<>(id, codec);
         this.defs.add(name);
         this.sbDefs.put(name, def);
@@ -42,7 +43,7 @@ public class NetworkRegistryNeoForge implements NetworkRegistry {
     @Override
     public <T> ClientboundMsgDef<T> registerClientbound(String name, Codec<T> codec) {
         this.checkUnregistered(this.cbDefs, name);
-        Identifier id = new Identifier(this.modId, name);
+        Identifier id = Identifier.of(this.modId, name);
         ClientboundMsgDefNeoForge<T> def = new ClientboundMsgDefNeoForge<>(id, codec);
         this.defs.add(name);
         this.cbDefs.put(name, def);
@@ -59,21 +60,32 @@ public class NetworkRegistryNeoForge implements NetworkRegistry {
         modBus.addListener(this::onRegisterPayloadHandlers);
     }
 
-    private void onRegisterPayloadHandlers(RegisterPayloadHandlerEvent event) {
-        IPayloadRegistrar registrar = event.registrar(modId);
+    private void onRegisterPayloadHandlers(RegisterPayloadHandlersEvent event) {
+        PayloadRegistrar registrar = event.registrar(modId);
 
         for (String name : defs) {
-            Identifier id = new Identifier(modId, name);
-            registrar.play(id, buf -> new MsgPayload(id, buf), builder -> {
-                if (sbDefs.containsKey(name)) {
+            Identifier id = Identifier.of(modId, name);
+            if (sbDefs.containsKey(name) && cbDefs.containsKey(name)) {
+                registrar.playBidirectional(MsgPayload.id(id), MsgPayload.codec(id), (payload, ctx) -> {
+                    if (ctx.flow() == NetworkSide.CLIENTBOUND) {
+                        ClientboundMsgDefNeoForge<?> def = cbDefs.get(name);
+                        def.handle(payload, ctx);
+                    } else {
+                        ServerboundMsgDefNeoForge<?> def = sbDefs.get(name);
+                        def.handle(payload, ctx);
+                    }
+                });
+            } else if (sbDefs.containsKey(name)) {
+                registrar.playToServer(MsgPayload.id(id), MsgPayload.codec(id), (payload, ctx) -> {
                     ServerboundMsgDefNeoForge<?> def = sbDefs.get(name);
-                    builder.server(def::handle);
-                }
-                if (cbDefs.containsKey(name)) {
+                    def.handle(payload, ctx);
+                });
+            } else if (cbDefs.containsKey(name)) {
+                registrar.playToClient(MsgPayload.id(id), MsgPayload.codec(id), (payload, ctx) -> {
                     ClientboundMsgDefNeoForge<?> def = cbDefs.get(name);
-                    builder.client(def::handle);
-                }
-            });
+                    def.handle(payload, ctx);
+                });
+            }
         }
     }
 }

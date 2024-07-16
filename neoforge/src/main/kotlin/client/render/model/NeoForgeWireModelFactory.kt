@@ -45,10 +45,10 @@ class NeoForgeWireModelPartBuilder(
 class NeoForgeQuadMeshBuilder(private val sprite: Sprite, private val finished: (List<BakedQuad>) -> Unit) :
     QuadMeshBuilder {
     private val quads = mutableListOf<BakedQuad>()
-    private val builder = QuadBakingVertexConsumer(quads::add)
+    private val builder = QuadBakingVertexConsumer()
 
     override fun pos(x: Float, y: Float, z: Float) {
-        builder.vertex(x.toDouble(), y.toDouble(), z.toDouble())
+        builder.vertex(x, y, z)
     }
 
     override fun normal(x: Float, y: Float, z: Float) {
@@ -68,7 +68,10 @@ class NeoForgeQuadMeshBuilder(private val sprite: Sprite, private val finished: 
     }
 
     override fun emitVertex() {
-        builder.next()
+    }
+
+    override fun emitQuad() {
+        quads.add(builder.bakeQuad())
     }
 
     override fun aoEnabled(aoEnabled: Boolean) {

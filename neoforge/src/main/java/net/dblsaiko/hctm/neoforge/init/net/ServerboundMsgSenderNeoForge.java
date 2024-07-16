@@ -1,5 +1,6 @@
 package net.dblsaiko.hctm.neoforge.init.net;
 
+import net.dblsaiko.hctm.init.net.MsgPayload;
 import net.dblsaiko.hctm.init.net.PacketSender;
 import net.dblsaiko.hctm.init.net.ServerboundMsgSender;
 import net.dblsaiko.hctm.init.net.Utils;
@@ -26,7 +27,7 @@ public class ServerboundMsgSenderNeoForge<T> implements ServerboundMsgSender<T> 
             throw new IllegalStateException("Can't send serverbound message on dedicated server");
         }
 
-        PacketDistributor.SERVER.noArg().send(new MsgPayload(id, Utils.toNbt(codec, message)));
+        PacketDistributor.sendToServer(new MsgPayload(id, Utils.toNbt(codec, message)));
     }
 
     @Override
@@ -35,6 +36,6 @@ public class ServerboundMsgSenderNeoForge<T> implements ServerboundMsgSender<T> 
             throw new IllegalStateException("Can't send serverbound message on dedicated server");
         }
 
-        ((NeoForgePacketSender) sender).handler().send(new MsgPayload(id, Utils.toNbt(codec, message)));
+        ((NeoForgePacketSender) sender).handler().accept(new MsgPayload(id, Utils.toNbt(codec, message)));
     }
 }

@@ -78,7 +78,7 @@ class UnbakedWireModel(
 
     private val materials = Materials(standardAO = true, cornerAO = false)
 
-    override fun bake(ml: Baker, getTexture: Function<SpriteIdentifier, Sprite>, settings: ModelBakeSettings, p3: Identifier): BakedModel {
+    override fun bake(ml: Baker, getTexture: Function<SpriteIdentifier, Sprite>, settings: ModelBakeSettings): BakedModel {
         val sid = SpriteIdentifier(SpriteAtlasTexture.BLOCK_ATLAS_TEXTURE, texture)
         return factory.build(getTexture.apply(sid), CacheKey(cableWidth, cableHeight, textureSize)) {
             generateParts(it, RenderData(this.materials))
@@ -339,6 +339,7 @@ private data class Quad(val v1: Vertex, val v2: Vertex, val v3: Vertex, val v4: 
         }
         
         qe.aoEnabled(matAO)
+        qe.emitQuad()
     }
 
     fun transform(mat: Matrix4f) = Quad(
