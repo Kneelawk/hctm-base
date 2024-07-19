@@ -331,8 +331,8 @@ private data class Quad(val v1: Vertex, val v2: Vertex, val v3: Vertex, val v4: 
 
     fun into(qe: QuadMeshBuilder, matAO: Boolean) {
         for (q in listOf(v1, v2, v3, v4)) {
-            qe.color(-1)
             qe.pos(q.x, q.y, q.z)
+            qe.color(-1)
             qe.normal(q.nx, q.ny, q.nz)
             qe.uv(q.u, q.v)
             qe.emitVertex()
